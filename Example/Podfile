@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'EtherKit_Example' do
+  pod 'EtherKit', :path => '../'
+
+  target 'EtherKit_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
