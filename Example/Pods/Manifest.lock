@@ -1,0 +1,31 @@
+PODS:
+  - BigInt (3.0.1):
+    - SipHash (~> 1.2)
+  - EtherKit (0.1.0):
+    - BigInt
+    - JSONRPCKit
+    - MoreCodable
+  - JSONRPCKit (3.0.0):
+    - Result (~> 3.2.0)
+  - MoreCodable (0.1.1)
+  - Result (3.2.4)
+  - SipHash (1.2.0)
+
+DEPENDENCIES:
+  - EtherKit (from `../`)
+
+EXTERNAL SOURCES:
+  EtherKit:
+    :path: ../
+
+SPEC CHECKSUMS:
+  BigInt: 8e8a52161c745cd3ab78e3dc346a9fbee51e6cf6
+  EtherKit: ea6c7310ea9db8323138ebbaac1364f102c53b71
+  JSONRPCKit: 50e0dc5e7f873e87f81562feb8836b7d1974da6d
+  MoreCodable: eb08861583c094890d854dfd8c9315f4f45a034e
+  Result: d2d07204ce72856f1fd9130bbe42c35a7b0fea10
+  SipHash: c6e9e43e9c531b5bc6602545130c26194a6d31ce
+
+PODFILE CHECKSUM: 9d36563b3abf9d8d698f58c4c1322795ae69aef9
+
+COCOAPODS: 1.4.0

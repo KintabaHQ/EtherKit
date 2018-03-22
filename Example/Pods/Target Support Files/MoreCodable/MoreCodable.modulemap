@@ -1,0 +1,6 @@
+framework module MoreCodable {
+  umbrella header "MoreCodable-umbrella.h"
+
+  export *
+  module * { export * }
+}

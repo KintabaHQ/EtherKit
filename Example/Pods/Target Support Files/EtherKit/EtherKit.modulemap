@@ -1,0 +1,6 @@
+framework module EtherKit {
+  umbrella header "EtherKit-umbrella.h"
+
+  export *
+  module * { export * }
+}
