@@ -24,7 +24,7 @@ let allowedHexCharacters: Gen<Character> = Gen<Character>.one(of: [
 
 let validAddressGen = glue([Gen.pure("0x"), allowedHexCharacters.proliferate(withSize: 40).map { String($0) }])
 let validHashGen = glue([Gen.pure("0x"), allowedHexCharacters.proliferate(withSize: 64).map { String($0) }])
-let validCodeGen = glue([
+let validDataGen = glue([
   Gen.pure("0x"),
   allowedHexCharacters.proliferate
     .suchThat { $0.count % 2 == 0 }
@@ -46,9 +46,9 @@ struct ArbitraryHashStr: Arbitrary {
   let value: String
 }
 
-struct ArbitraryCodeStr: Arbitrary {
-  static var arbitrary: Gen<ArbitraryCodeStr> {
-    return validCodeGen.map(ArbitraryCodeStr.init)
+struct ArbitraryDataStr: Arbitrary {
+  static var arbitrary: Gen<ArbitraryDataStr> {
+    return validDataGen.map(ArbitraryDataStr.init)
   }
   let value: String
 }
@@ -64,6 +64,6 @@ struct ArbitraryUInt256Str: Arbitrary {
 
 extension UInt256: Arbitrary {
   public static var arbitrary: Gen<UInt256> {
-    return ArbitraryUInt256Str.arbitrary.map { UInt256($0.value)! }
+    return ArbitraryUInt256Str.arbitrary.map { UInt256(describing: $0.value)! }
   }
 }

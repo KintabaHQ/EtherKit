@@ -1,11 +1,11 @@
 //
-//  Code.swift
+//  Data.swift
 //  BigInt
 //
 //  Created by Cole Potrocky on 3/23/18.
 //
 
-public struct Code: UnformattedDataType {
+public struct Data: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .unlimited
   }

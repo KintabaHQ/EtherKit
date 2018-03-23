@@ -19,7 +19,7 @@ struct GetUncleCountByBlockNumberRequest: Request {
   }
   
   func response(from resultObject: Any) throws -> Response {
-    guard let uncleCount = UInt256(resultObject) else {
+    guard let uncleCount = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return uncleCount

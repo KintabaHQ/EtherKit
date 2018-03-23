@@ -13,7 +13,7 @@ struct HashRateRequest: Request {
   var method = "eth_hashrate"
   
   func response(from resultObject: Any) throws -> Response {
-    guard let hashRate = UInt256(resultObject) else {
+    guard let hashRate = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return hashRate

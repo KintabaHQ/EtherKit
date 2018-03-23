@@ -34,14 +34,13 @@ final class UnformattedDataTest: XCTestCase {
   }
   
   func testCodeConversion() {
-    property("A valid Code sequence is the same after packing into, then unpacking from Code") <- forAll { (code: ArbitraryCodeStr) in
-      let value = code.value
-      print(value)
-      guard let wrappedCode = Code(describing: value) else {
+    property("A valid Data sequence is the same after packing into, then unpacking from Code") <- forAll { (data: ArbitraryDataStr) in
+      let value = data.value
+      guard let wrappedData = Data(describing: value) else {
         return false
       }
       
-      return value.caseInsensitiveCompare(String(describing: wrappedCode)) == ComparisonResult.orderedSame
+      return value.caseInsensitiveCompare(String(describing: wrappedData)) == ComparisonResult.orderedSame
     }
   }
 }

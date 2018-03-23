@@ -8,11 +8,15 @@
 import JSONRPCKit
 
 struct CoinbaseRequest: Request {
-  typealias Response = Int
+  typealias Response = Address
   
   var method = "eth_coinbase"
   
   func response(from resultObject: Any) throws -> Response {
-    fatalError()
+    guard let coinbaseStr = resultObject as? String,
+      let coinbase = Address(describing: coinbaseStr) else {
+      throw JSONRPCError.unexpectedTypeObject(resultObject)
+    }
+    return coinbase
   }
 }

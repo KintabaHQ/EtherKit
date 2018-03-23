@@ -13,7 +13,7 @@ struct PeerCountRequest: Request {
   var method = "net_peerCount"
   
   func response(from resultObject: Any) throws -> Response {
-    guard let peerCount = UInt256(resultObject) else {
+    guard let peerCount = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return peerCount

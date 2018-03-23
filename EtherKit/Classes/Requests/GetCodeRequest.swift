@@ -1,29 +1,30 @@
 //
-//  GetBalanceRequest.swift
+//  GetCodeRequest.swift
 //  EtherKit
 //
-//  Created by Cole Potrocky on 3/21/18.
+//  Created by Cole Potrocky on 3/23/18.
 //
 
-import BigInt
 import JSONRPCKit
 
-struct GetBalanceRequest: Request {
-  typealias Response = UInt256
+struct GetCodeRequest: Request {
+  typealias Response = Data
   
   let address: Address
   let blockNumber: BlockNumber
-
-  var method = "eth_getBalance"
+  
+  var method = "eth_getCode"
   
   var parameters: Any? {
     return [address, blockNumber]
   }
   
   func response(from resultObject: Any) throws -> Response {
-    guard let balance = UInt256(describing: resultObject) else {
+    guard let dataStr = resultObject as? String,
+      let data = Data(describing: dataStr) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
-    return balance
+    return data
   }
 }
+

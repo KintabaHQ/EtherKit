@@ -19,7 +19,7 @@ struct GetBlockTransitionCountByNumberRequest: Request {
   }
   
   func response(from resultObject: Any) throws -> Response {
-    guard let transactionCount = UInt256(resultObject) else {
+    guard let transactionCount = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return transactionCount

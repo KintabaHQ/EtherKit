@@ -14,7 +14,7 @@ struct BlockNumberRequest: Request {
   var method = "eth_blockNumber"
   
   func response(from resultObject: Any) throws -> Response {
-    guard let blockNumber = UInt256(resultObject) else {
+    guard let blockNumber = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return blockNumber

@@ -7,7 +7,7 @@
 
 import BigInt
 
-public struct UInt256 {
+public struct UInt256: Encodable {
   public let describing: BigUInt
   
   public init(_ value: BigUInt) {
@@ -35,3 +35,4 @@ extension UInt256: CustomStringConvertible {
     return "0x\(String(describing, radix: 16))"
   }
 }
+

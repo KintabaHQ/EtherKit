@@ -14,7 +14,7 @@ struct GasPriceRequest: Request {
   var method = "eth_gasPrice"
   
   func response(from resultObject: Any) throws -> Response {
-    guard let gasPrice = UInt256(resultObject) else {
+    guard let gasPrice = UInt256(describing: resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
     return gasPrice
