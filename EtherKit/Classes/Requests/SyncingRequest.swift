@@ -11,9 +11,6 @@ import MoreCodable
 struct SyncingRequest: Request {
   typealias Response = SyncingStatus
   
-  let address: Address
-  let blockNumber: BlockNumber
-  
   var method = "eth_syncing"
   
   func response(from resultObject: Any) throws -> Response {

@@ -12,7 +12,7 @@ struct VersionRequest: Request {
   
   var method = "net_version"
 
-  func response(from resultObject: Any) throws -> Network {
+  func response(from resultObject: Any) throws -> Response {
     guard let rawResult = resultObject as? String,
       let network = Network(rawValue: rawResult) else {
         throw JSONRPCError.unexpectedTypeObject(resultObject)

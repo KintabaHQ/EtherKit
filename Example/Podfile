@@ -1,11 +1,15 @@
 use_frameworks!
 
-target 'EtherKit_Example' do
+def standard_pods
   pod 'EtherKit', :path => '../'
-
-  target 'EtherKit_Tests' do
-    inherit! :search_paths
-
-    
-  end
 end
+
+target 'EtherKit_Example' do
+  standard_pods
+end
+
+target 'EtherKit_Tests' do
+  standard_pods
+  pod 'SwiftCheck'
+end
+

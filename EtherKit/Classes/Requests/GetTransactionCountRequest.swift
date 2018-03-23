@@ -1,29 +1,30 @@
 //
-//  GetBalanceRequest.swift
-//  EtherKit
+//  GetTransactionCountRequest.swift
+//  BigInt
 //
-//  Created by Cole Potrocky on 3/21/18.
+//  Created by Cole Potrocky on 3/22/18.
 //
 
-import BigInt
 import JSONRPCKit
 
-struct GetBalanceRequest: Request {
+struct GetTransactionCountRequest: Request {
   typealias Response = UInt256
   
   let address: Address
   let blockNumber: BlockNumber
-
-  var method = "eth_getBalance"
+  
+  var method = "eth_getTransactionCount"
   
   var parameters: Any? {
     return [address, blockNumber]
   }
   
   func response(from resultObject: Any) throws -> Response {
-    guard let balance = UInt256(resultObject) else {
+    guard let transactionCount = UInt256(resultObject) else {
       throw JSONRPCError.unexpectedTypeObject(resultObject)
     }
-    return balance
+    return transactionCount
   }
 }
+
+

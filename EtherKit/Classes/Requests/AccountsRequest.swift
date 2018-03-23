@@ -18,7 +18,7 @@ struct AccountsRequest: Request {
     }
     
     return try maybeAddresses.map { addrStr in
-      guard let address = Address(addrStr) else {
+      guard let address = Address(describing: addrStr) else {
         throw JSONRPCError.unexpectedTypeObject(addrStr)
       }
       return address

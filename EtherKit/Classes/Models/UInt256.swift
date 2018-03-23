@@ -7,21 +7,21 @@
 
 import BigInt
 
-struct UInt256 {
+public struct UInt256 {
   let value: BigUInt
   
-  init(_ value: BigUInt) {
+  public init(_ value: BigUInt) {
     self.value = value
   }
   
-  init?(_ value: String) {
+  public init?(_ value: String) {
     guard let value = BigUInt(value.dropHexPrefix, radix: 16) else {
       return nil
     }
     self.init(value)
   }
   
-  init?(_ value: Any) {
+  public init?(_ value: Any) {
     guard let strValue = value as? String else {
       return nil
     }

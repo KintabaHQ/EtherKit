@@ -10,9 +10,11 @@ PODS:
   - MoreCodable (0.1.1)
   - Result (3.2.4)
   - SipHash (1.2.0)
+  - SwiftCheck (0.9.1)
 
 DEPENDENCIES:
   - EtherKit (from `../`)
+  - SwiftCheck
 
 EXTERNAL SOURCES:
   EtherKit:
@@ -25,7 +27,8 @@ SPEC CHECKSUMS:
   MoreCodable: eb08861583c094890d854dfd8c9315f4f45a034e
   Result: d2d07204ce72856f1fd9130bbe42c35a7b0fea10
   SipHash: c6e9e43e9c531b5bc6602545130c26194a6d31ce
+  SwiftCheck: 533279411be74b15d5cb519b4df7fea3e441979e
 
-PODFILE CHECKSUM: 9d36563b3abf9d8d698f58c4c1322795ae69aef9
+PODFILE CHECKSUM: 28fa6a4f53234538ae2133bb9d8d985410dc0e03
 
 COCOAPODS: 1.4.0
