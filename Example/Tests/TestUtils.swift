@@ -30,6 +30,7 @@ let validCodeGen = glue([
     .suchThat { $0.count % 2 == 0 }
     .map { String($0) }
 ])
+let validUInt256Gen = allowedHexCharacters.proliferate(withSize: 64).map { String($0).lowercased() }
 
 struct ArbitraryAddressStr: Arbitrary {
   static var arbitrary: Gen<ArbitraryAddressStr> {
@@ -52,16 +53,17 @@ struct ArbitraryCodeStr: Arbitrary {
   let value: String
 }
 
-extension BigUInt: Arbitrary {
-  public static var arbitrary: Gen<BigUInt> {
-    return decimalDigits.proliferate.map { BigUInt(String($0), radix: 10)! }
+struct ArbitraryUInt256Str: Arbitrary {
+  static var arbitrary: Gen<ArbitraryUInt256Str> {
+    return validUInt256Gen.map({
+      return ArbitraryUInt256Str(value: "0x\(String(BigUInt($0, radix: 16)!, radix: 16))")
+    })
   }
+  let value: String
 }
 
-/*
 extension UInt256: Arbitrary {
   public static var arbitrary: Gen<UInt256> {
-    return Gen<BigUInt>.map { UInt256($0) }
+    return ArbitraryUInt256Str.arbitrary.map { UInt256($0.value)! }
   }
 }
- */

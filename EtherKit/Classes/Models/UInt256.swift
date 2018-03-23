@@ -8,30 +8,30 @@
 import BigInt
 
 public struct UInt256 {
-  let value: BigUInt
+  public let describing: BigUInt
   
   public init(_ value: BigUInt) {
-    self.value = value
+    self.describing = value
   }
   
-  public init?(_ value: String) {
-    guard let value = BigUInt(value.dropHexPrefix, radix: 16) else {
+  public init?(describing: String) {
+    guard let value = BigUInt(describing.dropHexPrefix, radix: 16) else {
       return nil
     }
     self.init(value)
   }
   
-  public init?(_ value: Any) {
-    guard let strValue = value as? String else {
+  public init?(describing: Any) {
+    guard let strValue = describing as? String else {
       return nil
     }
     
-    self.init(strValue)
+    self.init(describing: strValue)
   }
 }
 
 extension UInt256: CustomStringConvertible {
-  var description: String {
-    return "0x\(value)"
+  public var description: String {
+    return "0x\(String(describing, radix: 16))"
   }
 }
