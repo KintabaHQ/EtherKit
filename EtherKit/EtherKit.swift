@@ -10,11 +10,10 @@ public enum ConnectionMode {
   case http
 }
 
-final public class EtherKit {
-  
+public final class EtherKit {
   private let connectionMode: ConnectionMode
   private let url: URL
-  
+
   private lazy var manager: RequestManager = {
     switch connectionMode {
     case .http:
@@ -28,16 +27,16 @@ final public class EtherKit {
     self.url = url
     self.connectionMode = connectionMode
   }
-  
+
   public func balanceOf(_ address: Address, blockNumber: BlockNumber = .latest) -> GetBalanceRequest {
     return GetBalanceRequest(GetBalanceRequest.Parameters(address: address, blockNumber: blockNumber))
   }
-  
+
   public func request<T: Request>(_ request: T, completion: @escaping (T.Result) -> Void) throws {
     guard let requestAsDatum = try? JSONSerialization.data(withJSONObject: [request.marshaled()]) else {
       return
     }
-    
+
     manager.queueRequest(
       .single(request.id),
       request: requestAsDatum
@@ -48,7 +47,7 @@ final public class EtherKit {
       completion(result)
     }
   }
-  
+
   public func request<T1: Request, T2: Request>(
     _ request1: T1,
     _ request2: T2,
@@ -59,7 +58,7 @@ final public class EtherKit {
     ) else {
       return
     }
-    
+
     manager.queueRequest(
       .batch([request1.id, request2.id]),
       request: requestsAsData
@@ -67,7 +66,7 @@ final public class EtherKit {
       guard let responses = responses as? [Any] else {
         return
       }
-      
+
       let result1 = responses.compactMap { try? request1.response(from: $0) }.first
       let result2 = responses.compactMap { try? request2.response(from: $0) }.first
       guard result1 != nil && result2 != nil else {
@@ -76,7 +75,7 @@ final public class EtherKit {
       completion(result1!, result2!)
     }
   }
-  
+
   public func request<T1: Request, T2: Request, T3: Request>(
     _ request1: T1,
     _ request2: T2,
@@ -88,13 +87,13 @@ final public class EtherKit {
     ) else {
       return
     }
-    
+
     manager.queueRequest(
       .batch([request1.id, request2.id, request3.id]),
       request: requestsAsData
     ) { responses in
       guard let responses = responses as? [Any]
-         else {
+      else {
         return
       }
       let result1 = responses.compactMap { try? request1.response(from: $0) }.first

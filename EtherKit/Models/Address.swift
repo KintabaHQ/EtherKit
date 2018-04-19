@@ -9,6 +9,6 @@ public struct Address: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .constrained(20)
   }
-  
+
   let describing: [UInt8]
 }

@@ -9,22 +9,22 @@ public enum BlockNumber {
   case earliest
   case latest
   case pending
-  
+
   case specific(UInt256)
 }
 
 extension BlockNumber: RawRepresentable {
   public typealias RawValue = String
-  
+
   public var rawValue: RawValue {
     switch self {
     case .earliest: return "earliest"
     case .latest: return "latest"
     case .pending: return "pending"
-    case .specific(let blockNumber): return String(describing: blockNumber)
+    case let .specific(blockNumber): return String(describing: blockNumber)
     }
   }
-  
+
   public init?(rawValue: RawValue) {
     switch rawValue {
     case "earliest": self = .earliest

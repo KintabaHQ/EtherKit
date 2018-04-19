@@ -9,6 +9,6 @@ public struct Hash: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .constrained(32)
   }
-  
+
   let describing: [UInt8]
 }

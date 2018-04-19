@@ -9,6 +9,6 @@ public struct Nonce: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .constrained(8)
   }
-  
+
   let describing: [UInt8]
 }

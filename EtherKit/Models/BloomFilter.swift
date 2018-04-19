@@ -9,6 +9,6 @@ public struct BloomFilter: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .constrained(256)
   }
-  
+
   let describing: [UInt8]
 }

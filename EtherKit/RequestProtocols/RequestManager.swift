@@ -8,27 +8,26 @@
 public enum RequestIDKey: Hashable {
   public var hashValue: Int {
     switch self {
-    case .batch(let ids):
+    case let .batch(ids):
       return ids.compactMap { $0?.hashValue }.reduce(0) { $0 ^ $1 }
-    case .single(let id):
+    case let .single(id):
       return id?.hashValue ?? 0
     }
   }
-  
+
   case batch([String?])
   case single(String?)
 }
 
-
 public protocol RequestManager: class {
   var url: URL { get }
-  
+
   func queueRequest(
     _ key: RequestIDKey,
     request: String,
     callback: @escaping (_ response: Any) -> Void
   )
-  
+
   func queueRequest(
     _ key: RequestIDKey,
     request: Data,

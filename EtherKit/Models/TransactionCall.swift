@@ -14,11 +14,11 @@ public struct TransactionCall: Marshaling {
   let gasPrice: UInt256? = nil
   let value: UInt256? = nil
   let data: GeneralData? = nil
-  
+
   public init(to: Address) {
     self.to = to
   }
-  
+
   public func marshaled() -> [String: Any] {
     return [
       "to": to,
@@ -26,7 +26,7 @@ public struct TransactionCall: Marshaling {
       "gas": gas,
       "gasPrice": gasPrice,
       "value": value,
-      "data": data
-      ].filter { (_, value) in value != nil }.mapValues({ String(describing: $0) })
+      "data": data,
+    ].filter { _, value in value != nil }.mapValues({ String(describing: $0) })
   }
 }

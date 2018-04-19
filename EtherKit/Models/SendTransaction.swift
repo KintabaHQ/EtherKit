@@ -24,8 +24,8 @@ extension SendTransaction: Marshaling {
       "gas": gas,
       "gasPrice": gasPrice,
       "value": value,
-      "data": data
+      "data": data,
     ]
-    return toDict.filter { (_, value) in value != nil }.mapValues { String(describing: $0!) }
+    return toDict.filter { _, value in value != nil }.mapValues { String(describing: $0!) }
   }
 }

@@ -9,6 +9,6 @@ public struct GeneralData: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
     return .unlimited
   }
-  
+
   let describing: [UInt8]
 }

@@ -5,11 +5,10 @@
 //  Created by Cole Potrocky on 4/12/18.
 //
 
-import Starscream
 import Marshal
+import Starscream
 
 class WebSocketManager: WebSocketDelegate, RequestManager {
-  
   // The URL of the WebSocket server
   let url: URL
   // Pending requests that are queued to write once the socket connects
@@ -22,13 +21,13 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
     webSocket.connect()
     return webSocket
   }()
-  
+
   init(for url: URL) {
     self.url = url
   }
-  
+
   // MARK: - RequestManager
-  
+
   func queueRequest(
     _ key: RequestIDKey,
     request: String,
@@ -40,43 +39,41 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
     }
     pendingRequests.append(request)
   }
-  
+
   // MARK: - WebSocketDelegate
-  
+
   func websocketDidConnect(socket: WebSocketClient) {
     for request in pendingRequests {
       socket.write(string: request)
     }
     pendingRequests = []
   }
-  
-  func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+
+  func websocketDidDisconnect(socket _: WebSocketClient, error _: Error?) {
   }
-  
-  func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
+
+  func websocketDidReceiveMessage(socket _: WebSocketClient, text: String) {
     guard let jsonAsData = text.data(using: .utf8),
       let unserialized = try? JSONSerialization.jsonObject(with: jsonAsData) else {
       return
     }
-    
-    var maybeIDKey: RequestIDKey? = nil
+
+    var maybeIDKey: RequestIDKey?
     if let batchResponse = unserialized as? [[String: Any]] {
-      maybeIDKey = try? .batch(batchResponse.map { try $0.value(for: "id") })
+      maybeIDKey = try?.batch(batchResponse.map { try $0.value(for: "id") })
     } else if let singleResponse = unserialized as? [String: Any] {
-      maybeIDKey = try? .single(try singleResponse.value(for: "id"))
+      maybeIDKey = try?.single(try singleResponse.value(for: "id"))
     }
-    
+
     guard let idKey = maybeIDKey,
       let callback = pendingResponses[idKey] else {
       return
     }
-  
+
     pendingResponses.removeValue(forKey: idKey)
     callback(unserialized)
   }
-  
-  func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
-  }
-  
-}
 
+  func websocketDidReceiveData(socket _: WebSocketClient, data _: Data) {
+  }
+}

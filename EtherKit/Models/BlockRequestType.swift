@@ -12,14 +12,14 @@ public enum BlockRequestType {
 
 extension BlockRequestType: RawRepresentable {
   public typealias RawValue = Bool
-  
+
   public init?(rawValue: Bool) {
     switch rawValue {
     case false: self = .onlyHashes
     case true: self = .fullTransactions
     }
   }
-  
+
   public var rawValue: Bool {
     switch self {
     case .onlyHashes: return false

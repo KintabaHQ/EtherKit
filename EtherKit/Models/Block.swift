@@ -22,20 +22,20 @@ extension BlockTransactions: ValueType {
         return hash
       })
     }
-    
+
     guard let transactionMaps = object as? [[String: Any]] else {
       throw MarshalError.typeMismatch(expected: [[String: Any]].self, actual: type(of: object))
     }
-    
+
     return try .transactions(transactionMaps.map {
-      return try Transaction(object: $0)
+      try Transaction(object: $0)
     })
   }
 }
 
 extension BlockTransactions: RawRepresentable {
   public typealias RawValue = [Any]
-  
+
   init?(rawValue: [Any]) {
     if let valueAsHash = rawValue as? [String] {
       guard let hashes = try? valueAsHash.map(Hash.value) else {
@@ -43,18 +43,18 @@ extension BlockTransactions: RawRepresentable {
       }
       self = .hashes(hashes)
     }
-    
+
     guard let transactions = try? rawValue.map(Transaction.value) else {
       return nil
     }
     self = .transactions(transactions)
   }
-  
+
   var rawValue: [Any] {
     switch self {
-    case .hashes(let hashes):
+    case let .hashes(hashes):
       return hashes.map { String(describing: $0) }
-    case .transactions(let transactions):
+    case let .transactions(transactions):
       return transactions.map { $0.marshaled() }
     }
   }
@@ -80,7 +80,7 @@ public struct Block: Unmarshaling, Marshaling {
   let timestamp: UInt256
   let uncles: [Hash]
   let transactions: BlockTransactions
-  
+
   public init(object: MarshaledObject) throws {
     number = try object.value(for: "number")
     hash = try object.value(for: "hash")
@@ -102,8 +102,8 @@ public struct Block: Unmarshaling, Marshaling {
     uncles = try object.value(for: "uncles")
     transactions = try object.value(for: "transactions")
   }
-  
-  public func marshaled() -> [String : Any] {
+
+  public func marshaled() -> [String: Any] {
     return [
       "number": String(describing: number),
       "hash": String(describing: hash),
@@ -123,7 +123,7 @@ public struct Block: Unmarshaling, Marshaling {
       "gasUsed": String(describing: gasUsed),
       "timestamp": String(describing: timestamp),
       "uncles": String(describing: uncles),
-      "transactions": transactions.rawValue
+      "transactions": transactions.rawValue,
     ]
   }
 }

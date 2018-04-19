@@ -50,10 +50,9 @@ extension Transaction: Marshaling {
       "value": value,
       "gasPrice": gasPrice,
       "gas": gas,
-      "input": input
+      "input": input,
     ]
-    
-    return toDict.filter { (_, value) in value != nil }.mapValues { String(describing: $0) }
+
+    return toDict.filter { _, value in value != nil }.mapValues { String(describing: $0) }
   }
 }
-

@@ -29,29 +29,28 @@ extension UnformattedDataType {
     guard let dataObject = Self(describing: dataString) else {
       throw MarshalError.typeMismatch(expected: Self.self, actual: type(of: dataString))
     }
-    
+
     return dataObject
   }
-  
+
   public var description: String {
-    return describing.reduce("0x") { return "\($0)\(String(format: "%02x", $1))" }
+    return describing.reduce("0x") { "\($0)\(String(format: "%02x", $1))" }
   }
-  
+
   public init?(describing: String) {
     guard let describing = describing.hexToBytes else {
       return nil
     }
-    
+
     switch Self.byteCount {
-    case .constrained(let by):
+    case let .constrained(by):
       guard describing.count == by else {
         return nil
       }
     case .unlimited:
       break
     }
-    
+
     self.init(describing: describing)
   }
 }
-
