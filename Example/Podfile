@@ -1,6 +1,8 @@
 use_frameworks!
+inhibit_all_warnings!
 
 def standard_pods
+  platform :ios, '10.0'
   pod 'EtherKit', :path => '../'
 end
 

@@ -1,39 +1,48 @@
 PODS:
+  - APIKit (3.2.1):
+    - Result (~> 3.0)
   - BigInt (3.0.1):
     - SipHash (~> 1.2)
   - EtherKit (0.1.0):
+    - APIKit
     - BigInt
+    - JSONRPCKit
     - Marshal
     - Starscream
+  - JSONRPCKit (3.0.0):
+    - Result (~> 3.2.0)
   - Marshal (1.2.4)
+  - Result (3.2.4)
   - SipHash (1.2.0)
   - Starscream (3.0.5)
-  - SwiftCheck (0.9.1)
 
 DEPENDENCIES:
-  - EtherKit (from `../`)
-  - SwiftCheck
+  - EtherKit (from `/Users/colep/Projects/VaultProjects/EtherKit`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - APIKit
     - BigInt
+    - JSONRPCKit
     - Marshal
+    - Result
     - SipHash
     - Starscream
-    - SwiftCheck
 
 EXTERNAL SOURCES:
   EtherKit:
-    :path: "../"
+    :path: "/Users/colep/Projects/VaultProjects/EtherKit"
 
 SPEC CHECKSUMS:
+  APIKit: a39ff72ac44efc15513fd1b98800f63c525be61b
   BigInt: 8e8a52161c745cd3ab78e3dc346a9fbee51e6cf6
-  EtherKit: 6a92a444f9e1f9d759b3f9ecfa70457ad1e85dbe
+  EtherKit: c96acace6e39e62c5c8a944428aa910d5219a898
+  JSONRPCKit: 50e0dc5e7f873e87f81562feb8836b7d1974da6d
   Marshal: 8e04e6624e506921db7143b0bfd83caee03f32d6
+  Result: d2d07204ce72856f1fd9130bbe42c35a7b0fea10
   SipHash: c6e9e43e9c531b5bc6602545130c26194a6d31ce
   Starscream: faf918b2f2eff7d5dd21180646bf015a669673bd
-  SwiftCheck: 533279411be74b15d5cb519b4df7fea3e441979e
 
-PODFILE CHECKSUM: 1b90f733f5b06c3d9e7a7a5dc6b438519fe1ac57
+PODFILE CHECKSUM: 2ff6bcfef6903590fb34319ece1a2a5a3550fd59
 
 COCOAPODS: 1.5.0

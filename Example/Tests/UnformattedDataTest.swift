@@ -36,7 +36,7 @@ final class UnformattedDataTest: XCTestCase {
   func testCodeConversion() {
     property("A valid Data sequence is the same after packing into, then unpacking from Code") <- forAll { (data: ArbitraryDataStr) in
       let value = data.value
-      guard let wrappedData = Data(describing: value) else {
+      guard let wrappedData = GeneralData(describing: value) else {
         return false
       }
       
