@@ -32,6 +32,10 @@ public final class EtherKit {
     return GetBalanceRequest(GetBalanceRequest.Parameters(address: address, blockNumber: blockNumber))
   }
 
+  public func transactionCount(_ address: Address, blockNumber: BlockNumber = .latest) -> GetTransactionCountRequest {
+    return GetTransactionCountRequest(GetTransactionCountRequest.Parameters(address: address, blockNumber: blockNumber))
+  }
+
   public func request<T: Request>(_ request: T, completion: @escaping (T.Result) -> Void) throws {
     guard let requestAsDatum = try? JSONSerialization.data(withJSONObject: [request.marshaled()]) else {
       return
