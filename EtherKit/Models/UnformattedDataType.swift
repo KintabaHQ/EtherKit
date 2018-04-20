@@ -14,6 +14,7 @@ public enum UnformattedDataMode {
 
 protocol UnformattedDataType: CustomStringConvertible, ValueType {
   static var byteCount: UnformattedDataMode { get }
+
   var describing: [UInt8] { get }
 
   init(describing: [UInt8])
@@ -34,7 +35,7 @@ extension UnformattedDataType {
   }
 
   public var description: String {
-    return describing.reduce("0x") { "\($0)\(String(format: "%02x", $1))" }
+    return String.bytesToPaddedHex(describing)
   }
 
   public init?(describing: String) {

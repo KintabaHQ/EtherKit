@@ -6,6 +6,10 @@
 //
 
 extension String {
+  static func bytesToPaddedHex(_ bytes: [UInt8]) -> String {
+    return bytes.reduce("0x") { "\($0)\(String(format: "%02x", $1))" }
+  }
+
   var dropHexPrefix: String {
     return hasHexPrefix ? String(dropFirst(2)) : self
   }

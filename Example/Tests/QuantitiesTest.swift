@@ -8,8 +8,8 @@
 
 import BigInt
 import EtherKit
-import XCTest
 import SwiftCheck
+import XCTest
 
 final class QuantitiesTest: XCTestCase {
   func testInt256Conversion() {

@@ -21,25 +21,25 @@ final class UnformattedDataTest: XCTestCase {
       return value.caseInsensitiveCompare(String(describing: wrappedAddress)) == ComparisonResult.orderedSame
     }
   }
-  
+
   func testHashConversion() {
     property("A valid Hash is the same after packing into, then unpacking from Hash") <- forAll { (hash: ArbitraryHashStr) in
       let value = hash.value
       guard let wrappedHash = Hash(describing: value) else {
         return false
       }
-      
+
       return value.caseInsensitiveCompare(String(describing: wrappedHash)) == ComparisonResult.orderedSame
     }
   }
-  
+
   func testCodeConversion() {
     property("A valid Data sequence is the same after packing into, then unpacking from Code") <- forAll { (data: ArbitraryDataStr) in
       let value = data.value
       guard let wrappedData = GeneralData(describing: value) else {
         return false
       }
-      
+
       return value.caseInsensitiveCompare(String(describing: wrappedData)) == ComparisonResult.orderedSame
     }
   }

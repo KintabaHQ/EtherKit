@@ -39,4 +39,5 @@ Pod::Spec.new do |s|
   s.dependency 'BigInt'
   s.dependency 'Starscream'
   s.dependency 'Marshal'
+  s.dependency 'CryptoSwift'
 end
