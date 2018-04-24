@@ -26,10 +26,10 @@ Pod::Spec.new do |s|
     * A codegen utility for generating Swift bindings for a Contract's ABI.
                        DESC
 
-  s.homepage         = 'https://github.com/Cole Potrocky/EtherKit'
+  s.homepage         = 'https://github.com/Vaultio/EtherKit'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Cole Potrocky' => 'cole@potrocky.com' }
-  s.source           = { :git => 'https://github.com/Cole Potrocky/EtherKit.git', :tag => s.version.to_s }
+  s.source           = { :git => 'git@github.com:Vaultio/EtherKit.git' }
 
   s.ios.deployment_target = '10.0'
 
