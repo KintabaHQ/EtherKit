@@ -14,6 +14,26 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
+    let manager = KeyManager(applicationTag: "com.cole.yay")
+    do {
+      let address = try manager.create(config: KeyManager.PairConfig(
+        keyLabel: "cool",
+        operationPrompt: "Yayayaya"
+      ))
+      print(address)
+      try manager.sign("foo bar".data(using: .utf8)!, for: address) {
+        print(String(describing: GeneralData(describing: [UInt8]($0))), "cole")
+        try? manager.verify($0, address: address, digest: "foo bar".data(using: .utf8)!.sha3(.keccak256)) {
+          if $0 {
+            print("valid signature")
+          } else {
+            print("invalid signature")
+          }
+        }
+      }
+    } catch {
+      print(error)
+    }
 
     try? kit.request(
       kit.balanceOf(Address(describing: "0xe375873f25f589726bbf200187aa5fb07f5f7451")!),

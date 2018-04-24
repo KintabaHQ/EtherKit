@@ -40,4 +40,5 @@ Pod::Spec.new do |s|
   s.dependency 'Starscream'
   s.dependency 'Marshal'
   s.dependency 'CryptoSwift'
+  s.dependency 'secp256k1.swift'
 end

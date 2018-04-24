@@ -6,6 +6,7 @@
 //
 
 import CryptoSwift
+import secp256k1
 
 public struct Address: UnformattedDataType {
   static var byteCount: UnformattedDataMode {
@@ -36,5 +37,13 @@ public struct Address: UnformattedDataType {
 
   init(describing: [UInt8]) {
     self.describing = describing
+  }
+
+  init(from publicKey: secp256k1_pubkey) {
+    var publicKey = publicKey
+    let bytes: [UInt8] = withUnsafeBytes(of: &publicKey.data) { ptr in
+      return (0 ..< 64).map { ptr[$0] }
+    }
+    self.init(describing: [UInt8](Data(bytes: bytes).sha3(.keccak256)[12 ..< 32]))
   }
 }
