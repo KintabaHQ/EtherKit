@@ -93,8 +93,16 @@ extension Request where Parameters: Marshaling {
 }
 
 extension Request where Parameters == Void {
-  var parameters: Void {
+  public var parameters: Void {
     return ()
+  }
+
+  public func marshaled() -> [String: Any] {
+    return [
+      "jsonrpc": version,
+      "method": method,
+      "id": id!,
+    ]
   }
 }
 

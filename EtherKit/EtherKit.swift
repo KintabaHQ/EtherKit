@@ -28,6 +28,10 @@ public final class EtherKit {
     self.connectionMode = connectionMode
   }
 
+  public func networkVersion() -> NetVersionRequest {
+    return NetVersionRequest()
+  }
+
   public func balanceOf(_ address: Address, blockNumber: BlockNumber = .latest) -> GetBalanceRequest {
     return GetBalanceRequest(GetBalanceRequest.Parameters(address: address, blockNumber: blockNumber))
   }

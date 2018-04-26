@@ -36,9 +36,9 @@ class ViewController: UIViewController {
     }
 
     try? kit.request(
+      kit.networkVersion(),
       kit.balanceOf(Address(describing: "0xe375873f25f589726bbf200187aa5fb07f5f7451")!),
-      kit.balanceOf(Address(describing: "0xfb385836bcad905d17ef32873ef17f22bbc7b2da")!),
-      kit.balanceOf(Address(describing: "0x4044bb3d4a4c9afd530217067bb5921eeb182e4b")!)
+      kit.balanceOf(Address(describing: "0xfb385836bcad905d17ef32873ef17f22bbc7b2da")!)
     ) { result1, result2, result3 in
       print("parsed results", result1, result2, result3)
     }
