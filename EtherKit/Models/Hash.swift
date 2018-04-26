@@ -10,5 +10,5 @@ public struct Hash: UnformattedDataType {
     return .constrained(32)
   }
 
-  let describing: [UInt8]
+  let data: Data
 }

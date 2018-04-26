@@ -10,9 +10,5 @@ public struct GeneralData: UnformattedDataType {
     return .unlimited
   }
 
-  let describing: [UInt8]
-
-  public init(describing: [UInt8]) {
-    self.describing = describing
-  }
+  public let data: Data
 }

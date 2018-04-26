@@ -8,16 +8,17 @@
 import Marshal
 
 public enum UnformattedDataMode {
-  case constrained(UInt)
+  case constrained(Int)
   case unlimited
 }
 
 protocol UnformattedDataType: CustomStringConvertible, ValueType {
   static var byteCount: UnformattedDataMode { get }
+  static func value(from data: Data) throws -> Self
 
-  var describing: [UInt8] { get }
-
-  init(describing: [UInt8])
+  var data: Data { get }
+  
+  init(data: Data)
   init?(describing: String)
 }
 
@@ -33,25 +34,38 @@ extension UnformattedDataType {
 
     return dataObject
   }
+  
+  public static func value(from data: Data) throws -> Self {
+    switch Self.byteCount {
+    case let .constrained(by):
+      guard data.count == by else {
+        throw EtherKitError.invalidDataSize(expected: by, actual: data.count)
+      }
+    case .unlimited:
+      break
+    }
+    
+    return Self(data: data)
+  }
 
   public var description: String {
-    return String.bytesToPaddedHex(describing)
+    return data.paddedHexString
   }
 
   public init?(describing: String) {
-    guard let describing = describing.hexToBytes else {
+    guard let data = describing.hexToBytes else {
       return nil
     }
 
     switch Self.byteCount {
     case let .constrained(by):
-      guard describing.count == by else {
+      guard data.count == by else {
         return nil
       }
     case .unlimited:
       break
     }
 
-    self.init(describing: describing)
+    self.init(data: data)
   }
 }

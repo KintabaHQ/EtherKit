@@ -13,12 +13,12 @@ public struct Address: UnformattedDataType {
     return .constrained(20)
   }
 
-  let describing: [UInt8]
+  let data: Data
 
   // EIP55: Mixed-case checksum address encoding:
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
   public var description: String {
-    let addressString = String.bytesToPaddedHex(describing).dropHexPrefix
+    let addressString = data.paddedHexString.dropHexPrefix
     // The hash needs to include the zero-padded String.
     let hashString = addressString.data(using: .utf8)!.sha3(.keccak256).toHexString()
 
@@ -35,8 +35,8 @@ public struct Address: UnformattedDataType {
     return "0x\(address)"
   }
 
-  init(describing: [UInt8]) {
-    self.describing = describing
+  init(data: Data) {
+    self.data = data
   }
 
   init(from publicKey: secp256k1_pubkey) {
@@ -44,6 +44,6 @@ public struct Address: UnformattedDataType {
     let bytes: [UInt8] = withUnsafeBytes(of: &publicKey.data) { ptr in
       return (0 ..< 64).map { ptr[$0] }
     }
-    self.init(describing: [UInt8](Data(bytes: bytes).sha3(.keccak256)[12 ..< 32]))
+    self.init(data: Data(bytes: bytes).sha3(.keccak256)[12 ..< 32])
   }
 }

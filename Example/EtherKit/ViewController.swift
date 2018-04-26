@@ -22,7 +22,7 @@ class ViewController: UIViewController {
       ))
       print(address)
       try manager.sign("foo bar".data(using: .utf8)!, for: address) {
-        print(String(describing: GeneralData(describing: [UInt8]($0))), "cole")
+        print(String(describing: try? GeneralData.value(from: $0)), "cole")
         try? manager.verify($0, address: address, digest: "foo bar".data(using: .utf8)!.sha3(.keccak256)) {
           if $0 {
             print("valid signature")

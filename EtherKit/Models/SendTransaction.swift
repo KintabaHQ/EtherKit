@@ -13,7 +13,7 @@ public struct SendTransaction {
   let gas: UInt256?
   let gasPrice: UInt256?
   let value: UInt256?
-  let data: GeneralData = GeneralData(describing: [])
+  let data: GeneralData = GeneralData(data: Data())
 }
 
 extension SendTransaction: Marshaling {

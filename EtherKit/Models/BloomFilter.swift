@@ -10,5 +10,5 @@ public struct BloomFilter: UnformattedDataType {
     return .constrained(256)
   }
 
-  let describing: [UInt8]
+  public let data: Data
 }

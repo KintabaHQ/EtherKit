@@ -10,5 +10,5 @@ public struct Nonce: UnformattedDataType {
     return .constrained(8)
   }
 
-  let describing: [UInt8]
+  public let data: Data
 }
