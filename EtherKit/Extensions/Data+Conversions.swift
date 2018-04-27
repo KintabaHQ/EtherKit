@@ -7,6 +7,6 @@
 
 extension Data {
   var paddedHexString: String {
-    return self.reduce("0x") { "\($0)\(String(format: "%02x", $1))" }
+    return reduce("0x") { "\($0)\(String(format: "%02x", $1))" }
   }
 }

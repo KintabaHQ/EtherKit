@@ -10,6 +10,7 @@
 		1D45E1762064535A003B2C31 /* UnformattedDataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E1752064535A003B2C31 /* UnformattedDataTest.swift */; };
 		1D45E18120653CA9003B2C31 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E17F20653C96003B2C31 /* TestUtils.swift */; };
 		1D45E1872065427E003B2C31 /* QuantitiesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E18520654240003B2C31 /* QuantitiesTest.swift */; };
+		1DAC23C22092705400E201C8 /* RLPTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC23C12092705400E201C8 /* RLPTest.swift */; };
 		1DC2F1EA208A734E0021DAF6 /* AddressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC2F1E9208A734E0021DAF6 /* AddressTest.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -36,6 +37,7 @@
 		1D45E1752064535A003B2C31 /* UnformattedDataTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnformattedDataTest.swift; sourceTree = "<group>"; };
 		1D45E17F20653C96003B2C31 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		1D45E18520654240003B2C31 /* QuantitiesTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantitiesTest.swift; sourceTree = "<group>"; };
+		1DAC23C12092705400E201C8 /* RLPTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLPTest.swift; sourceTree = "<group>"; };
 		1DC2F1E9208A734E0021DAF6 /* AddressTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressTest.swift; sourceTree = "<group>"; };
 		27CD00935B0BDAD9D13D70F0 /* Pods-EtherKit_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EtherKit_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-EtherKit_Example/Pods-EtherKit_Example.release.xcconfig"; sourceTree = "<group>"; };
 		2A237B24CE7426B8CDF0F9E2 /* Pods-EtherKit_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EtherKit_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-EtherKit_Example/Pods-EtherKit_Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				1D45E17F20653C96003B2C31 /* TestUtils.swift */,
 				1D45E18520654240003B2C31 /* QuantitiesTest.swift */,
 				1DC2F1E9208A734E0021DAF6 /* AddressTest.swift */,
+				1DAC23C12092705400E201C8 /* RLPTest.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -385,6 +388,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1DAC23C22092705400E201C8 /* RLPTest.swift in Sources */,
 				1D45E1762064535A003B2C31 /* UnformattedDataTest.swift in Sources */,
 				1D45E18120653CA9003B2C31 /* TestUtils.swift in Sources */,
 				1DC2F1EA208A734E0021DAF6 /* AddressTest.swift in Sources */,

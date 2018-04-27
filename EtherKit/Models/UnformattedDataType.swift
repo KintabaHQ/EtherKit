@@ -17,7 +17,7 @@ protocol UnformattedDataType: CustomStringConvertible, ValueType {
   static func value(from data: Data) throws -> Self
 
   var data: Data { get }
-  
+
   init(data: Data)
   init?(describing: String)
 }
@@ -34,7 +34,7 @@ extension UnformattedDataType {
 
     return dataObject
   }
-  
+
   public static func value(from data: Data) throws -> Self {
     switch Self.byteCount {
     case let .constrained(by):
@@ -44,7 +44,7 @@ extension UnformattedDataType {
     case .unlimited:
       break
     }
-    
+
     return Self(data: data)
   }
 
