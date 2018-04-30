@@ -12,7 +12,7 @@ public enum UnformattedDataMode {
   case unlimited
 }
 
-protocol UnformattedDataType: CustomStringConvertible, ValueType {
+protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType {
   static var byteCount: UnformattedDataMode { get }
   static func value(from data: Data) throws -> Self
 
@@ -23,18 +23,6 @@ protocol UnformattedDataType: CustomStringConvertible, ValueType {
 }
 
 extension UnformattedDataType {
-  public static func value(from object: Any) throws -> Self {
-    guard let dataString = object as? String else {
-      throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
-    }
-
-    guard let dataObject = Self(describing: dataString) else {
-      throw MarshalError.typeMismatch(expected: Self.self, actual: type(of: dataString))
-    }
-
-    return dataObject
-  }
-
   public static func value(from data: Data) throws -> Self {
     switch Self.byteCount {
     case let .constrained(by):
@@ -48,8 +36,18 @@ extension UnformattedDataType {
     return Self(data: data)
   }
 
-  public var description: String {
-    return data.paddedHexString
+  // MARK: - ValueType
+
+  public static func value(from object: Any) throws -> Self {
+    guard let dataString = object as? String else {
+      throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
+    }
+
+    guard let dataObject = Self(describing: dataString) else {
+      throw MarshalError.typeMismatch(expected: Self.self, actual: type(of: dataString))
+    }
+
+    return dataObject
   }
 
   public init?(describing: String) {
@@ -67,5 +65,17 @@ extension UnformattedDataType {
     }
 
     self.init(data: data)
+  }
+
+  // MARK: - CustomStringConvertible
+
+  public var description: String {
+    return data.paddedHexString
+  }
+
+  // MARK: - RLPValueType
+
+  public func toRLPData(lift: @escaping (Data) -> RLPData) -> RLPData {
+    return data.toRLPData(lift: lift)
   }
 }

@@ -5,6 +5,7 @@
 //  Created by Cole Potrocky on 4/21/18.
 //
 
+import BigInt
 import CryptoSwift
 import LocalAuthentication
 import secp256k1
@@ -33,12 +34,9 @@ public final class KeyManager {
   }
 
   public struct PairConfig {
-    // The label for the private key.  We don't store the public key and only will derive it where necessary.
-    public var keyLabel: String
     public var operationPrompt: String?
 
-    public init(keyLabel: String, operationPrompt: String? = nil) {
-      self.keyLabel = keyLabel
+    public init(operationPrompt: String? = nil) {
       self.operationPrompt = operationPrompt
     }
   }
@@ -72,28 +70,38 @@ public final class KeyManager {
     self.applicationTag = applicationTag
   }
 
-  public func sign(_ data: Data, for address: Address, callback: @escaping (Data) -> Void) throws {
+  public func sign(
+    _ data: Data,
+    for address: Address,
+    callback: @escaping (_ sig: Data, _ recoveryID: UInt) -> Void
+  ) throws {
     var digestForData = [UInt8](data.sha3(.keccak256))
-    var unsafeSignature = secp256k1_ecdsa_signature.init()
+    var unsafeSignature = secp256k1_ecdsa_recoverable_signature.init()
 
     try mapToCryptoKey(for: address) { privateKey throws in
-      let result = secp256k1_ecdsa_sign(
+      let result = secp256k1_ecdsa_sign_recoverable(
         self.secp256k1Context,
         &unsafeSignature,
         &digestForData,
         privateKey,
-        secp256k1_nonce_function_default,
+        secp256k1_nonce_function_rfc6979,
         nil
       )
       guard result == 1 else {
-        throw KeyManagerError.signFailure
+        throw EtherKitError.keyManagerFailed(reason: .signatureFailed)
       }
 
-      let bytesPtr: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: 64)
-      secp256k1_ecdsa_signature_serialize_compact(self.secp256k1Context, bytesPtr, &unsafeSignature)
-      let bytes: [UInt8] = (0 ..< Int(64)).map { return bytesPtr[$0] }
+      let signatureBytesPtr: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: 64)
+      var recoveryID: Int32 = 0
+      secp256k1_ecdsa_recoverable_signature_serialize_compact(
+        self.secp256k1Context,
+        signatureBytesPtr,
+        &recoveryID,
+        &unsafeSignature
+      )
+      let signatureBytes: [UInt8] = (0 ..< Int(64)).map { return signatureBytesPtr[$0] }
 
-      callback(Data(bytes: bytes))
+      callback(Data(bytes: signatureBytes), UInt(recoveryID))
     }
   }
 
@@ -123,7 +131,7 @@ public final class KeyManager {
   // Creating a key-pair consists of creating two new curves:
   // 1. A SECP-256r1 curve.  This keypair sits in the secure element on the device.
   // 2. a SECP-256k1 curve.  This keypair is encrypted in keychain using the SE key.
-  public func create(config: PairConfig) throws -> Address {
+  public func create(config _: PairConfig) throws -> Address {
     // overwrite data in memory
     var secp256k1PrivateBytes = [UInt8](repeating: 0, count: Constants.bytesInSecp256k1PrivateKey)
     // Generating 32 random bytes for the private key has a small probability of being out of bounds,
@@ -132,9 +140,18 @@ public final class KeyManager {
       SecRandomCopyBytes(kSecRandomDefault, Constants.bytesInSecp256k1PrivateKey, &secp256k1PrivateBytes)
     } while secp256k1_ec_seckey_verify(secp256k1Context, &secp256k1PrivateBytes) != 1
 
-    var secp256k1PublicKey: secp256k1_pubkey = secp256k1_pubkey.init()
-    secp256k1_ec_pubkey_create(secp256k1Context, &secp256k1PublicKey, secp256k1PrivateBytes)
-    var newAddress = Address(from: secp256k1PublicKey)
+    var secp256k1PublicKeyRaw: secp256k1_pubkey = secp256k1_pubkey.init()
+    secp256k1_ec_pubkey_create(secp256k1Context, &secp256k1PublicKeyRaw, secp256k1PrivateBytes)
+    var secp256k1PublicKey = [UInt8](repeating: 0, count: 65)
+    var pubKeySerializedLength = 65
+    secp256k1_ec_pubkey_serialize(
+      secp256k1Context,
+      &secp256k1PublicKey,
+      &pubKeySerializedLength,
+      &secp256k1PublicKeyRaw,
+      UInt32(SECP256K1_EC_UNCOMPRESSED)
+    )
+    var newAddress = Address(from: Data(secp256k1PublicKey.dropFirst()))
 
     var secp256k1PrivateKey = Data(bytes: secp256k1PrivateBytes)
     // We should probably not do this on the main thread.
@@ -149,7 +166,6 @@ public final class KeyManager {
       let privateKeyAttrs: [String: Any] = [
         kSecAttrIsPermanent as String: true,
         kSecAttrAccessControl as String: access,
-        kSecAttrLabel as String: config.keyLabel,
         kSecAttrApplicationTag as String: KeyType.enclave.applicationTag(for: newAddress),
         kSecUseAuthenticationUI as String: kSecUseAuthenticationUIAllow,
       ]
@@ -163,7 +179,7 @@ public final class KeyManager {
 
       var error: Unmanaged<CFError>?
       guard let enclaveKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
-        throw KeyManagerError.secureEnclaveCreationFailure
+        throw EtherKitError.keyManagerFailed(reason: .secureEnclaveCreationFailed)
       }
 
       let publicKey = SecKeyCopyPublicKey(enclaveKey)!
@@ -175,7 +191,7 @@ public final class KeyManager {
       )
 
       guard secp256k1CipherKey != nil else {
-        throw KeyManagerError.encryptionFailure
+        throw EtherKitError.keyManagerFailed(reason: .encryptionFailed)
       }
       secp256k1PrivateKey = secp256k1CipherKey as! Data
     }
@@ -188,7 +204,7 @@ public final class KeyManager {
 
     let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
     guard addStatus == errSecSuccess else {
-      throw KeyManagerError.keychainStorageFailure
+      throw EtherKitError.keyManagerFailed(reason: .keychainStorageFailure)
     }
 
     return newAddress
@@ -204,7 +220,7 @@ public final class KeyManager {
     ]
     let status = SecItemCopyMatching(getquery as CFDictionary, &cryptoPrivateKey)
     guard status == errSecSuccess else {
-      throw KeyManagerError.keyNotFound
+      throw EtherKitError.keyManagerFailed(reason: .keyNotFound)
     }
     guard Device.hasSecureEnclave else {
       try block([UInt8](cryptoPrivateKey as! Data))
@@ -219,7 +235,7 @@ public final class KeyManager {
     ]
     let enclaveStatus = SecItemCopyMatching(enclaveQuery as CFDictionary, &enclavePrivateKey)
     guard enclaveStatus == errSecSuccess else {
-      throw KeyManagerError.keyNotFound
+      throw EtherKitError.keyManagerFailed(reason: .keyNotFound)
     }
     let decryptedCryptoKey = SecKeyCreateDecryptedData(
       enclavePrivateKey as! SecKey,
@@ -229,7 +245,7 @@ public final class KeyManager {
     )
 
     guard decryptedCryptoKey != nil else {
-      throw KeyManagerError.decryptionFailure
+      throw EtherKitError.keyManagerFailed(reason: .decryptionFailed)
     }
 
     try block([UInt8](decryptedCryptoKey as! Data))

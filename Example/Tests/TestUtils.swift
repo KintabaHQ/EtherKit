@@ -71,3 +71,15 @@ extension UInt256: Arbitrary {
     return ArbitraryUInt256Str.arbitrary.map { UInt256(describing: $0.value)! }
   }
 }
+
+struct ArbitraryLongStr: Arbitrary {
+  static var arbitrary: Gen<ArbitraryLongStr> {
+    return Gen<Character>
+      .choose((Character("!"), Character("~")))
+      .proliferate
+      .suchThat { $0.count > 200 && $0.count <= 1200 }
+      .map { ArbitraryLongStr(value: String($0)) }
+  }
+
+  let value: String
+}

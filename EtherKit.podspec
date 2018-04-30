@@ -41,4 +41,5 @@ Pod::Spec.new do |s|
   s.dependency 'Marshal'
   s.dependency 'CryptoSwift'
   s.dependency 'secp256k1.swift'
+  s.dependency 'Result', '~> 4.0.0'
 end

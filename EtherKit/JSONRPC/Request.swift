@@ -43,20 +43,18 @@ extension Request {
 
   public func response(from response: Any) throws -> Result {
     guard let wrappedResponse = try? Response.value(from: response) else {
-      throw JSONRPCError.parseError(
-        MarshalError.typeMismatch(expected: Response.self, actual: type(of: response))
+      throw EtherKitError.jsonRPCFailed(
+        reason: .parseError(error: MarshalError.typeMismatch(expected: Response.self, actual: type(of: response)))
       )
     }
 
     guard wrappedResponse.id == id, wrappedResponse.version == version else {
-      throw JSONRPCError.responseMismatch(requestID: id, responseID: wrappedResponse.id)
+      throw EtherKitError.jsonRPCFailed(reason: .responseMismatch(requestID: id, responseID: wrappedResponse.id))
     }
 
     if let error = wrappedResponse.error {
-      throw JSONRPCError.responseError(
-        code: error.code,
-        message: error.message,
-        data: error.data
+      throw EtherKitError.jsonRPCFailed(
+        reason: .responseError(code: error.code, message: error.message, data: error.data)
       )
     }
 

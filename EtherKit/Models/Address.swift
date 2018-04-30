@@ -39,11 +39,7 @@ public struct Address: UnformattedDataType {
     self.data = data
   }
 
-  init(from publicKey: secp256k1_pubkey) {
-    var publicKey = publicKey
-    let bytes: [UInt8] = withUnsafeBytes(of: &publicKey.data) { ptr in
-      return (0 ..< 64).map { ptr[$0] }
-    }
-    self.init(data: Data(bytes: bytes).sha3(.keccak256)[12 ..< 32])
+  init(from publicKey: Data) {
+    self.init(data: publicKey.sha3(.keccak256)[12 ..< 32])
   }
 }

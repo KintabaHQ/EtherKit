@@ -21,6 +21,12 @@ public struct UInt256 {
     }
     self.init(value)
   }
+
+  public func toPaddedData() -> Data {
+    var unpaddedValue = describing.serialize()
+    let paddingAmount = 32 - unpaddedValue.count
+    return Data(repeating: 0, count: paddingAmount) + unpaddedValue
+  }
 }
 
 extension UInt256: CustomStringConvertible {
@@ -40,5 +46,11 @@ extension UInt256: ValueType {
     }
 
     return uintValue
+  }
+}
+
+extension UInt256: RLPValueType {
+  public func toRLPData(lift: @escaping (Data) -> RLPData) -> RLPData {
+    return describing.toRLPData(lift: lift)
   }
 }
