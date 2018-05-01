@@ -162,7 +162,7 @@ public final class KeyManager {
       } else {
         biometryFlag = .touchIDCurrentSet
       }
-      
+
       let access = SecAccessControlCreateWithFlags(
         kCFAllocatorDefault,
         kSecAttrAccessibleWhenUnlocked,

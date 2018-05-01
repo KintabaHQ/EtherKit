@@ -32,14 +32,21 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'git@github.com:Vaultio/EtherKit.git' }
 
   s.ios.deployment_target = '10.0'
-
-  s.source_files = 'EtherKit/**/*'
   s.swift_version = '4.1'
 
-  s.dependency 'BigInt'
-  s.dependency 'Starscream'
-  s.dependency 'Marshal'
-  s.dependency 'CryptoSwift'
-  s.dependency 'secp256k1.swift'
-  s.dependency 'Result', '~> 4.0.0'
+  s.subspec 'Core' do |core|
+    core.source_files = 'EtherKit/**/*'
+    core.dependency 'BigInt'
+    core.dependency 'Starscream'
+    core.dependency 'Marshal'
+    core.dependency 'CryptoSwift'
+    core.dependency 'secp256k1.swift'
+    core.dependency 'Result', '~> 4.0.0'
+  end
+
+  s.subspec 'PromiseKit' do |promisekit|
+    promisekit.source_files = 'Extras/PromiseKit/*.swift'
+    promisekit.dependency 'EtherKit/Core'
+    promisekit.dependency 'PromiseKit/CorePromise'
+  end
 end
