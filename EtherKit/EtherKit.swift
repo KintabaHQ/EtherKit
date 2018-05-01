@@ -200,8 +200,9 @@ public final class EtherKit {
   }
 
   public func createKeyPair(
-    _ config: KeyManager.PairConfig = KeyManager.PairConfig(operationPrompt: nil)
-  ) throws -> Address {
-    return try keyManager.create(config: config)
+    _ config: KeyManager.PairConfig = KeyManager.PairConfig(operationPrompt: nil),
+    completion: @escaping (Result<Address, EtherKitError>) -> Void
+  ) {
+    return try keyManager.create(config: config, completion: completion)
   }
 }

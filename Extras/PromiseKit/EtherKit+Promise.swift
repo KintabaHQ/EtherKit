@@ -39,4 +39,13 @@ extension EtherKit {
       self.send(with: sender, to: to, value: value) { seal.resolve($0.value, $0.error) }
     }
   }
+  
+  public func createKeyPair(
+    _: PMKNamespacer,
+    _ config: KeyManager.PairConfig = KeyManager.PairConfig(operationPrompt: nil)
+  ) -> Promise<Address> {
+    return Promise { seal in
+      self.createKeyPair(config) { seal.resolve($0.value, $0.error) }
+    }
+  }
 }

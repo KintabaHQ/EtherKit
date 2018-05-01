@@ -9,6 +9,7 @@
 import BigInt
 import EtherKit
 import UIKit
+import PromiseKit
 
 class ViewController: UIViewController {
   // Keep one reference to EtherKit per app.
@@ -19,22 +20,26 @@ class ViewController: UIViewController {
       applicationTag: "io.vault.etherkit.example"
     )
   }()
-
-  private lazy var generatedAddress: Address = {
-    try! etherKit.createKeyPair()
-  }()
-
-  private lazy var toAddress: Address = {
-    try! etherKit.createKeyPair()
-  }()
+  
+  private var generatedAddress: Address! {
+    didSet {
+      addressField.text = String(describing: generatedAddress!)
+    }
+  }
+  private var toAddress: Address!
 
   @IBOutlet var addressField: UITextField!
   @IBOutlet var signedTransactionField: UITextView!
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    addressField.text = String(describing: generatedAddress)
+    
+    firstly {
+      when(fulfilled: etherKit.createKeyPair(.promise), etherKit.createKeyPair(.promise))
+    }.done { address1, address2 in
+      self.generatedAddress = address1
+      self.toAddress = address2
+    }
   }
 
   override func didReceiveMemoryWarning() {
@@ -47,7 +52,7 @@ class ViewController: UIViewController {
       with: generatedAddress,
       transaction: TransactionCall(
         nonce: UInt256(0),
-        to: toAddress,
+        to: toAddress!,
         gasLimit: UInt256(describing: "0xff")!,
         gasPrice: UInt256(describing: "0xfacefaceface")!,
         value: UInt256(describing: "0xffffface")!
