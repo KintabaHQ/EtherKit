@@ -156,10 +156,17 @@ public final class KeyManager {
     var secp256k1PrivateKey = Data(bytes: secp256k1PrivateBytes)
     // We should probably not do this on the main thread.
     if Device.hasSecureEnclave {
+      let biometryFlag: SecAccessControlCreateFlags
+      if #available(iOS 11.3, *) {
+        biometryFlag = .biometryCurrentSet
+      } else {
+        biometryFlag = .touchIDCurrentSet
+      }
+      
       let access = SecAccessControlCreateWithFlags(
         kCFAllocatorDefault,
         kSecAttrAccessibleWhenUnlocked,
-        .userPresence,
+        [.privateKeyUsage, biometryFlag],
         nil
       )!
 
