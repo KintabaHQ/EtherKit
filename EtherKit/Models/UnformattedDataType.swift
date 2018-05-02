@@ -12,7 +12,7 @@ public enum UnformattedDataMode {
   case unlimited
 }
 
-protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType {
+protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType, Hashable {
   static var byteCount: UnformattedDataMode { get }
   static func value(from data: Data) throws -> Self
 
