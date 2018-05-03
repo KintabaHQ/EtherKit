@@ -68,7 +68,7 @@ struct ArbitraryUInt256Str: Arbitrary {
 
 extension UInt256: Arbitrary {
   public static var arbitrary: Gen<UInt256> {
-    return ArbitraryUInt256Str.arbitrary.map { UInt256(describing: $0.value)! }
+    return ArbitraryUInt256Str.arbitrary.map { try! UInt256(describing: $0.value) }
   }
 }
 

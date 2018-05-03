@@ -15,9 +15,11 @@ public struct UInt256 {
     describing = value
   }
 
-  public init?(describing: String) {
+  public init(describing: String) throws {
     guard let value = BigUInt(describing.dropHexPrefix, radix: 16) else {
-      return nil
+      throw EtherKitError.dataConversionFailed(
+        reason: .scalarConversionFailed(forValue: describing, toType: BigUInt.self)
+      )
     }
     self.init(value)
   }
@@ -41,16 +43,24 @@ extension UInt256: ValueType {
       throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
     }
 
-    guard let uintValue = UInt256(describing: intStr) else {
-      throw MarshalError.typeMismatch(expected: UInt256.self, actual: type(of: intStr))
-    }
-
-    return uintValue
+    return try UInt256(describing: intStr)
   }
 }
 
 extension UInt256: RLPValueType {
   public func toRLPData(lift: @escaping (Data) -> RLPData) -> RLPData {
     return describing.toRLPData(lift: lift)
+  }
+}
+
+extension UInt256: Codable {
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(String(describing: self))
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    try self.init(describing: container.decode(String.self))
   }
 }

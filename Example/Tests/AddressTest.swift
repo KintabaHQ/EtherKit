@@ -25,7 +25,7 @@ final class AddressTest: XCTestCase {
     for address in addresses {
       XCTAssertEqual(
         address,
-        String(describing: Address(describing: address)!),
+        String(describing: try! Address(describing: address)),
         "A parsed address should be stringified back into its EIP55 checksummed representation."
       )
     }

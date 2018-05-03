@@ -15,12 +15,7 @@ enum BlockTransactions {
 extension BlockTransactions: ValueType {
   static func value(from object: Any) throws -> BlockTransactions {
     if let valueAsHash = object as? [String] {
-      return try .hashes(valueAsHash.map {
-        guard let hash = Hash(describing: $0) else {
-          throw MarshalError.typeMismatch(expected: Hash.self, actual: type(of: $0))
-        }
-        return hash
-      })
+      return try .hashes(valueAsHash.map { try Hash(describing: $0) })
     }
 
     guard let transactionMaps = object as? [[String: Any]] else {

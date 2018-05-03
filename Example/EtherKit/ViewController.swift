@@ -53,9 +53,9 @@ class ViewController: UIViewController {
       transaction: TransactionCall(
         nonce: UInt256(0),
         to: toAddress!,
-        gasLimit: UInt256(describing: "0xff")!,
-        gasPrice: UInt256(describing: "0xfacefaceface")!,
-        value: UInt256(describing: "0xffffface")!
+        gasLimit: try! UInt256(describing: "0xff"),
+        gasPrice: try! UInt256(describing: "0xfacefaceface"),
+        value: try! UInt256(describing: "0xffffface")
       ),
       network: .main
     ) {
