@@ -12,28 +12,19 @@ public enum UnformattedDataMode {
   case unlimited
 }
 
-protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType, Hashable {
+protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType, Hashable, Codable {
   static var byteCount: UnformattedDataMode { get }
   static func value(from data: Data) throws -> Self
 
   var data: Data { get }
 
   init(data: Data)
-  init?(describing: String)
+  init(describing: String) throws
 }
 
 extension UnformattedDataType {
   public static func value(from data: Data) throws -> Self {
-    switch Self.byteCount {
-    case let .constrained(by):
-      guard data.count == by else {
-        throw EtherKitError.invalidDataSize(expected: by, actual: data.count)
-      }
-    case .unlimited:
-      break
-    }
-
-    return Self(data: data)
+    return Self(data: try validateData(for: data))
   }
 
   // MARK: - ValueType
@@ -43,28 +34,26 @@ extension UnformattedDataType {
       throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
     }
 
-    guard let dataObject = Self(describing: dataString) else {
-      throw MarshalError.typeMismatch(expected: Self.self, actual: type(of: dataString))
-    }
-
-    return dataObject
+    return try Self(describing: dataString)
   }
 
-  public init?(describing: String) {
+  public init(describing: String) throws {
     guard let data = describing.hexToBytes else {
-      return nil
+      throw EtherKitError.dataConversionFailed(reason: .scalarConversionFailed(forValue: describing, toType: Data.self))
     }
+    self.init(data: try Self.validateData(for: data))
+  }
 
+  static func validateData(for data: Data) throws -> Data {
     switch Self.byteCount {
     case let .constrained(by):
       guard data.count == by else {
-        return nil
+        throw EtherKitError.dataConversionFailed(reason: .wrongSize(expected: by, actual: data.count))
       }
     case .unlimited:
       break
     }
-
-    self.init(data: data)
+    return data
   }
 
   // MARK: - CustomStringConvertible
@@ -77,5 +66,17 @@ extension UnformattedDataType {
 
   public func toRLPData(lift: @escaping (Data) -> RLPData) -> RLPData {
     return data.toRLPData(lift: lift)
+  }
+
+  // MARK: - Codable
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(String(describing: self))
+  }
+
+  public init(from decoder: Decoder) throws {
+    var container = try decoder.singleValueContainer()
+    try self.init(describing: try container.decode(String.self))
   }
 }

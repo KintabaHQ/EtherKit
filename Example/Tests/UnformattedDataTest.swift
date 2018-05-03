@@ -14,7 +14,7 @@ final class UnformattedDataTest: XCTestCase {
   func testAddressConversion() {
     property("A valid Address is the same after packing into, then unpacking from Address") <- forAll { (address: ArbitraryAddressStr) in
       let value = address.value
-      guard let wrappedAddress = Address(describing: value) else {
+      guard let wrappedAddress = try? Address(describing: value) else {
         return false
       }
 
@@ -25,7 +25,7 @@ final class UnformattedDataTest: XCTestCase {
   func testHashConversion() {
     property("A valid Hash is the same after packing into, then unpacking from Hash") <- forAll { (hash: ArbitraryHashStr) in
       let value = hash.value
-      guard let wrappedHash = Hash(describing: value) else {
+      guard let wrappedHash = try? Hash(describing: value) else {
         return false
       }
 
@@ -36,7 +36,7 @@ final class UnformattedDataTest: XCTestCase {
   func testCodeConversion() {
     property("A valid Data sequence is the same after packing into, then unpacking from Code") <- forAll { (data: ArbitraryDataStr) in
       let value = data.value
-      guard let wrappedData = GeneralData(describing: value) else {
+      guard let wrappedData = try? GeneralData(describing: value) else {
         return false
       }
 

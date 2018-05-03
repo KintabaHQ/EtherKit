@@ -11,7 +11,7 @@ extension String {
   }
 
   var hexToUInt256: UInt256? {
-    return UInt256(describing: self)
+    return try? UInt256(describing: self)
   }
 
   var hexToBytes: Data? {

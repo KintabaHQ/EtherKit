@@ -24,8 +24,13 @@ public enum EtherKitError: Error {
     case unknown
   }
 
+  public enum DataConversionFailureReason {
+    case wrongSize(expected: Int, actual: Int)
+    case scalarConversionFailed(forValue: Any, toType: Any)
+  }
+
   case keyManagerFailed(reason: KeyManagerFailureReason)
   case jsonRPCFailed(reason: JSONRPCFailureReason)
-  case invalidDataSize(expected: Int, actual: Int)
+  case dataConversionFailed(reason: DataConversionFailureReason)
   case unknown(error: Error)
 }
