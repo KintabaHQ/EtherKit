@@ -2,17 +2,17 @@ PODS:
   - BigInt (3.0.1):
     - SipHash (~> 1.2)
   - CryptoSwift (0.9.0)
-  - EtherKit (0.1.1):
-    - EtherKit/Core (= 0.1.1)
-    - EtherKit/PromiseKit (= 0.1.1)
-  - EtherKit/Core (0.1.1):
+  - EtherKit (0.1.2):
+    - EtherKit/Core (= 0.1.2)
+    - EtherKit/PromiseKit (= 0.1.2)
+  - EtherKit/Core (0.1.2):
     - BigInt
     - CryptoSwift
     - Marshal
     - Result (~> 4.0.0)
     - secp256k1.swift
     - Starscream
-  - EtherKit/PromiseKit (0.1.1):
+  - EtherKit/PromiseKit (0.1.2):
     - EtherKit/Core
     - PromiseKit/CorePromise
   - Marshal (1.2.4)
@@ -46,7 +46,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   BigInt: 8e8a52161c745cd3ab78e3dc346a9fbee51e6cf6
   CryptoSwift: bca8c5b653dcc2d9734409242a070ff53bafac86
-  EtherKit: 1c3ede4bf7d02e6e8f464d79389a61a71e7e5294
+  EtherKit: ce38ebadf011643dfd1425ac8a8dc47008a7fdd5
   Marshal: 8e04e6624e506921db7143b0bfd83caee03f32d6
   PromiseKit: a26828b0a8d5874960dfdb575b57a70790ec36f1
   Result: 7645bb3f50c2ce726dd0ff2fa7b6f42bbe6c3713

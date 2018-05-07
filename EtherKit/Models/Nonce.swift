@@ -6,9 +6,13 @@
 //
 
 public struct Nonce: UnformattedDataType {
-  static var byteCount: UnformattedDataMode {
+  public static var byteCount: UnformattedDataMode {
     return .constrained(8)
   }
 
   public let data: Data
+
+  public init(data: Data) {
+    self.data = data
+  }
 }

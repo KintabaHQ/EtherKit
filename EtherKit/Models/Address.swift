@@ -9,11 +9,11 @@ import CryptoSwift
 import secp256k1
 
 public struct Address: UnformattedDataType {
-  static var byteCount: UnformattedDataMode {
+  public static var byteCount: UnformattedDataMode {
     return .constrained(20)
   }
 
-  let data: Data
+  public let data: Data
 
   // EIP55: Mixed-case checksum address encoding:
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
@@ -35,11 +35,11 @@ public struct Address: UnformattedDataType {
     return "0x\(address)"
   }
 
-  init(data: Data) {
+  public init(data: Data) {
     self.data = data
   }
 
-  init(from publicKey: Data) {
+  public init(from publicKey: Data) {
     self.init(data: publicKey.sha3(.keccak256)[12 ..< 32])
   }
 }

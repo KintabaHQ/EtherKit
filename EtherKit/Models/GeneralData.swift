@@ -6,7 +6,7 @@
 //
 
 public struct GeneralData: UnformattedDataType {
-  static var byteCount: UnformattedDataMode {
+  public static var byteCount: UnformattedDataMode {
     return .unlimited
   }
 

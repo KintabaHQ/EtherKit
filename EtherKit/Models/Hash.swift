@@ -6,9 +6,13 @@
 //
 
 public struct Hash: UnformattedDataType {
-  static var byteCount: UnformattedDataMode {
+  public static var byteCount: UnformattedDataMode {
     return .constrained(32)
   }
 
-  let data: Data
+  public let data: Data
+
+  public init(data: Data) {
+    self.data = data
+  }
 }

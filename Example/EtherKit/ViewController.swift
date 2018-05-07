@@ -8,8 +8,8 @@
 
 import BigInt
 import EtherKit
-import UIKit
 import PromiseKit
+import UIKit
 
 class ViewController: UIViewController {
   // Keep one reference to EtherKit per app.
@@ -20,12 +20,13 @@ class ViewController: UIViewController {
       applicationTag: "io.vault.etherkit.example"
     )
   }()
-  
+
   private var generatedAddress: Address! {
     didSet {
       addressField.text = String(describing: generatedAddress!)
     }
   }
+
   private var toAddress: Address!
 
   @IBOutlet var addressField: UITextField!
@@ -33,7 +34,7 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    
+
     firstly {
       when(fulfilled: etherKit.createKeyPair(.promise), etherKit.createKeyPair(.promise))
     }.done { address1, address2 in
