@@ -8,7 +8,7 @@
 import BigInt
 
 public struct RLPData: UnformattedDataType {
-  static var byteCount: UnformattedDataMode {
+  public static var byteCount: UnformattedDataMode {
     return .unlimited
   }
 
@@ -17,6 +17,10 @@ public struct RLPData: UnformattedDataType {
   }
 
   public let data: Data
+
+  public init(data: Data) {
+    self.data = data
+  }
 }
 
 public protocol RLPValueType {
