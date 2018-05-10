@@ -160,7 +160,7 @@ public final class EtherKit {
     }
   }
 
-  public func personalSign(
+  public func sign(
     message: Data,
     network: Network,
     for address: Address,
@@ -178,13 +178,13 @@ public final class EtherKit {
     }
   }
 
-  public func personalSign(
+  public func sign(
     message: String,
     network: Network,
     for address: Address,
     completion: @escaping (Result<Signature, EtherKitError>) -> Void
   ) {
-    return personalSign(message: message.packedData, network: network, for: address, completion: completion)
+    return sign(message: message.packedData, network: network, for: address, completion: completion)
   }
 
   public func send(
