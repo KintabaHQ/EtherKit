@@ -65,8 +65,8 @@ class ViewController: UIViewController {
   }
     
     @IBAction func onPMTap(_: UIButton) {
-        let data = "this is a test message to sign".data(using: .utf8)!
-        etherKit.personalSign(message: data, network: .main, for: generatedAddress) {
+        let message = "this is a test message to sign"
+        etherKit.personalSign(message: message, network: .main, for: generatedAddress) {
             self.signedTransactionField.text = String(describing: $0.value!.marshaled())
         }
     }

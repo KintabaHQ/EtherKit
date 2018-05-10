@@ -9,7 +9,6 @@ import BigInt
 import Marshal
 
 public struct SignedTransactionCall {
-
   public let call: TransactionCall
   public let signature: Signature
 
@@ -24,14 +23,14 @@ public struct SignedTransactionCall {
       call: call,
       signature: Signature(v: network.rawValue, r: 0.packedData, s: 0.packedData)
     )
-    
+
     try Signature.create(
-        message: RLPData.encode(from: fakeTransaction).data,
-        manager: manager,
-        network: network,
-        for: address
+      message: RLPData.encode(from: fakeTransaction).data,
+      manager: manager,
+      network: network,
+      for: address
     ) { sig in
-        callback(SignedTransactionCall(call: call, signature: sig))
+      callback(SignedTransactionCall(call: call, signature: sig))
     }
   }
 }
