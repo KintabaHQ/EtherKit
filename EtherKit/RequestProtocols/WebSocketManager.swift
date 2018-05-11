@@ -60,9 +60,9 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
 
     var maybeIDKey: RequestIDKey?
     if let batchResponse = unserialized as? [[String: Any]] {
-      maybeIDKey = try?.batch(batchResponse.map { try $0.value(for: "id") })
+      maybeIDKey = try? .batch(batchResponse.map { try $0.value(for: "id") })
     } else if let singleResponse = unserialized as? [String: Any] {
-      maybeIDKey = try?.single(try singleResponse.value(for: "id"))
+      maybeIDKey = try? .single(try singleResponse.value(for: "id"))
     }
 
     guard let idKey = maybeIDKey,

@@ -160,6 +160,33 @@ public final class EtherKit {
     }
   }
 
+  public func sign(
+    message: Data,
+    network: Network,
+    for address: Address,
+    completion: @escaping (Result<Signature, EtherKitError>) -> Void
+  ) {
+    do {
+      let prefix = "\u{19}Ethereum Signed Message:\n\(message.count)".data(using: .utf8)!
+      try Signature.create(message: prefix + message, manager: keyManager, network: network, for: address) {
+        completion(.success($0))
+      }
+    } catch let error as EtherKitError {
+      completion(.failure(error))
+    } catch {
+      completion(.failure(.unknown(error: error)))
+    }
+  }
+
+  public func sign(
+    message: String,
+    network: Network,
+    for address: Address,
+    completion: @escaping (Result<Signature, EtherKitError>) -> Void
+  ) {
+    return sign(message: message.packedData, network: network, for: address, completion: completion)
+  }
+
   public func send(
     with sender: Address,
     to: Address,

@@ -9,22 +9,6 @@ import BigInt
 import Marshal
 
 public struct SignedTransactionCall {
-  public struct Signature: Marshaling {
-    public let v: UInt
-    public let r: Data
-    public let s: Data
-
-    // MARK: - Marshaling
-
-    public func marshaled() -> [String: Any] {
-      return [
-        "v": String(describing: GeneralData(data: v.packedData)),
-        "r": String(describing: GeneralData(data: r)),
-        "s": String(describing: GeneralData(data: s)),
-      ]
-    }
-  }
-
   public let call: TransactionCall
   public let signature: Signature
 
@@ -40,17 +24,13 @@ public struct SignedTransactionCall {
       signature: Signature(v: network.rawValue, r: 0.packedData, s: 0.packedData)
     )
 
-    try manager.sign(RLPData.encode(from: fakeTransaction).data, for: address) { rawSignature, recoveryID in
-      let rValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex ..< (rawSignature.startIndex + 32)))
-      let sValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex + 32 ..< rawSignature.count))
-
-      let signature = Signature(
-        v: (recoveryID + 27) + (network.rawValue > 0 ? network.rawValue * 2 + 8 : 0),
-        r: UInt256(rValueRaw).toPaddedData(),
-        s: UInt256(sValueRaw).toPaddedData()
-      )
-
-      callback(SignedTransactionCall(call: call, signature: signature))
+    try Signature.create(
+      message: RLPData.encode(from: fakeTransaction).data,
+      manager: manager,
+      network: network,
+      for: address
+    ) { sig in
+      callback(SignedTransactionCall(call: call, signature: sig))
     }
   }
 }
