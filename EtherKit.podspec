@@ -1,21 +1,7 @@
-#
-# Be sure to run `pod lib lint EtherKit.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
-#
-
 Pod::Spec.new do |s|
   s.name             = 'EtherKit'
   s.version          = '0.1.3'
   s.summary          = 'A library for interacting with the Ethereum network.'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
   EtherKit provides some useful abstractions for interacting with the Ethereum network:
@@ -27,8 +13,8 @@ Pod::Spec.new do |s|
                        DESC
 
   s.homepage         = 'https://github.com/Vaultio/EtherKit'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Cole Potrocky' => 'cole@potrocky.com' }
+  s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
+  s.authors          = "Vault, Inc."
   s.source           = { :git => 'git@github.com:Vaultio/EtherKit.git' }
 
   s.ios.deployment_target = '10.0'
