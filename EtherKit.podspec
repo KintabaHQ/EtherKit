@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/Vaultio/EtherKit'
   s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
   s.authors          = "Vault, Inc."
-  s.source           = { :git => 'git@github.com:Vaultio/EtherKit.git' }
+  s.source           = { :git => 'https://github.com/Vaultio/EtherKit.git', :tag => '0.1.3' }
 
   s.ios.deployment_target = '10.0'
   s.swift_version = '4.1'
