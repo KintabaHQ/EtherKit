@@ -23,13 +23,39 @@ public struct Signature: Marshaling {
     ]
   }
 
+  public func toString() -> String {
+    let sigData = r + s + v.packedData
+    return sigData.paddedHexString
+  }
+
   public static func create(
     message: Data,
+    manager: KeyManager,
+    network _: Network,
+    for address: Address,
+    callback: @escaping (Signature) -> Void
+  ) throws {
+    try manager.sign(message, for: address) { rawSignature, recoveryID in
+      let rValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex ..< (rawSignature.startIndex + 32)))
+      let sValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex + 32 ..< rawSignature.count))
+
+      callback(Signature(
+        v: (recoveryID + 27),
+        r: UInt256(rValueRaw).toPaddedData(),
+        s: UInt256(sValueRaw).toPaddedData()
+      ))
+    }
+  }
+
+  public static func create(
+    transaction: SignedTransactionCall,
     manager: KeyManager,
     network: Network,
     for address: Address,
     callback: @escaping (Signature) -> Void
   ) throws {
+    let message = RLPData.encode(from: transaction).data
+
     try manager.sign(message, for: address) { rawSignature, recoveryID in
       let rValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex ..< (rawSignature.startIndex + 32)))
       let sValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex + 32 ..< rawSignature.count))

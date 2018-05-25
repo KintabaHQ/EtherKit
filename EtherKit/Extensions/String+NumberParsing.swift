@@ -14,7 +14,7 @@ extension String {
     return try? UInt256(describing: self)
   }
 
-  var hexToBytes: Data? {
+  public var hexToBytes: Data? {
     let str = dropHexPrefix.lowercased()
     guard str.count % 2 == 0 else {
       return nil

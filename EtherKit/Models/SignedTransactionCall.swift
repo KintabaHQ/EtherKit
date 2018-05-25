@@ -25,7 +25,7 @@ public struct SignedTransactionCall {
     )
 
     try Signature.create(
-      message: RLPData.encode(from: fakeTransaction).data,
+      transaction: fakeTransaction,
       manager: manager,
       network: network,
       for: address
