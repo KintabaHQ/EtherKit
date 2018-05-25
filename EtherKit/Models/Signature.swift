@@ -8,7 +8,7 @@
 import BigInt
 import Marshal
 
-public struct Signature: Marshaling {
+public struct Signature: Marshaling, CustomStringConvertible {
   public var v: UInt
   public var r: Data
   public var s: Data
@@ -23,7 +23,7 @@ public struct Signature: Marshaling {
     ]
   }
 
-  public func toString() -> String {
+  public var description: String {
     let sigData = r + s + v.packedData
     return sigData.paddedHexString
   }
