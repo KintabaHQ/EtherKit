@@ -20,6 +20,7 @@ final class URLRequestManager: RequestManager {
 
     var urlRequest = URLRequest(url: url)
     urlRequest.httpMethod = "POST"
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     urlRequest.httpBody = request.data(using: .utf8)
 
     let session = URLSession(configuration: .default)

@@ -48,6 +48,10 @@ public final class EtherKit {
   public func transactionCount(_ address: Address, blockNumber: BlockNumber = .latest) -> GetTransactionCountRequest {
     return GetTransactionCountRequest(GetTransactionCountRequest.Parameters(address: address, blockNumber: blockNumber))
   }
+  
+  public func blockNumber() -> BlockNumberRequest {
+    return BlockNumberRequest()
+  }
 
   public func request<T: Request>(
     _ request: T,
