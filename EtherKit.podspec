@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'EtherKit'
-  s.version          = '0.1.3'
+  s.version          = '0.1.4'
   s.summary          = 'A library for interacting with the Ethereum network.'
 
   s.description      = <<-DESC
