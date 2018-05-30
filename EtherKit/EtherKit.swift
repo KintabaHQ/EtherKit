@@ -48,7 +48,7 @@ public final class EtherKit {
   public func transactionCount(_ address: Address, blockNumber: BlockNumber = .latest) -> GetTransactionCountRequest {
     return GetTransactionCountRequest(GetTransactionCountRequest.Parameters(address: address, blockNumber: blockNumber))
   }
-  
+
   public func blockNumber() -> BlockNumberRequest {
     return BlockNumberRequest()
   }
@@ -212,6 +212,48 @@ public final class EtherKit {
             gasLimit: UInt256(21000),
             gasPrice: UInt256(20_000_000_000),
             value: value
+          ),
+          network: network
+        ) {
+          switch $0 {
+          case let .success(signedTransaction):
+            let encodedData = RLPData.encode(from: signedTransaction)
+            let sendRequest = SendRawTransactionRequest(SendRawTransactionRequest.Parameters(data: encodedData))
+            self.request(sendRequest) { completion($0) }
+          case let .failure(error):
+            completion(.failure(error))
+          }
+        }
+      case let .failure(error):
+        completion(.failure(error))
+      }
+    }
+  }
+
+  public func send(
+    with sender: Address,
+    to: Address,
+    value: UInt256,
+    data: GeneralData,
+    gas: UInt256 = UInt256(21000),
+    completion: @escaping (Result<Hash, EtherKitError>) -> Void
+  ) {
+    request(
+      networkVersion(),
+      transactionCount(sender, blockNumber: .pending)
+    ) { result in
+      switch result {
+      case let .success(items):
+        let (network, nonce) = items
+        self.sign(
+          with: sender,
+          transaction: TransactionCall(
+            nonce: UInt256(nonce.describing),
+            to: to,
+            gasLimit: gas,
+            gasPrice: UInt256(20_000_000_000),
+            value: value,
+            data: data
           ),
           network: network
         ) {
