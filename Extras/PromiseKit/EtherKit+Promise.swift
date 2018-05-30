@@ -60,6 +60,18 @@ extension EtherKit {
     }
   }
 
+  public func send(
+    with sender: Address,
+    to: Address,
+    value: UInt256,
+    data: GeneralData,
+    gas: UInt256 = UInt256(21000)
+  ) -> Promise<Hash> {
+    return Promise { seal in
+      self.send(with: sender, to: to, value: value, data: data, gas: gas) { seal.resolve($0.value, $0.error) }
+    }
+  }
+
   public func createKeyPair(
     _: PMKNamespacer,
     _ config: KeyManager.PairConfig = KeyManager.PairConfig(operationPrompt: nil)
