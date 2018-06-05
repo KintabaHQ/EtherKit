@@ -53,6 +53,16 @@ extension EtherKit {
       self.sign(message: message, network: network, for: address) { seal.resolve($0.value, $0.error) }
     }
   }
+    
+    public func sign(
+        datas: [TypedData],
+        network: Network,
+        for address: Address
+        ) -> Promise<Signature> {
+        return Promise { seal in
+            self.sign(datas: datas, network: network, for: address) { seal.resolve($0.value, $0.error) }
+        }
+    }
 
   public func send(with sender: Address, to: Address, value: UInt256) -> Promise<Hash> {
     return Promise { seal in
