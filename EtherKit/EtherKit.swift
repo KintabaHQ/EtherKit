@@ -190,6 +190,27 @@ public final class EtherKit {
   ) {
     return sign(message: message.packedData, network: network, for: address, completion: completion)
   }
+    
+    public func sign(
+        datas: [TypedData],
+        network: Network,
+        for address: Address,
+        completion: @escaping (Result<Signature, EtherKitError>) -> Void
+        ) {
+        do {
+            let schemas = datas.map { $0.schemaData }.reduce(Data(), { $0 + $1 }).sha3(.keccak256)
+            let values = datas.map { $0.typedData }.reduce(Data(), { $0 + $1 }).sha3(.keccak256)
+            let message = (schemas + values)
+            
+            try Signature.create(message: message, manager: keyManager, network: network, for: address) {
+                completion(.success($0))
+            }
+        } catch let error as EtherKitError {
+            completion(.failure(error))
+        } catch {
+            completion(.failure(.unknown(error: error)))
+        }
+    }
 
   public func send(
     with sender: Address,
