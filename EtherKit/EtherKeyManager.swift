@@ -1,5 +1,5 @@
 //
-//  KeyManager.swift
+//  EtherKeyManager.swift
 //  EtherKit
 //
 //  Created by Cole Potrocky on 4/21/18.
@@ -11,7 +11,7 @@ import LocalAuthentication
 import Result
 import secp256k1
 
-public final class KeyManager {
+public final class EtherKeyManager {
   public enum Device {
     public static var hasSecureEnclave: Bool {
       return !isSimulator && hasBiometricSupport
@@ -31,14 +31,6 @@ public final class KeyManager {
         return error?.code != LAError.biometryNotAvailable.rawValue
       }
       return hasBiometricSupport
-    }
-  }
-
-  public struct PairConfig {
-    public var operationPrompt: String?
-
-    public init(operationPrompt: String? = nil) {
-      self.operationPrompt = operationPrompt
     }
   }
 
@@ -71,71 +63,12 @@ public final class KeyManager {
     self.applicationTag = applicationTag
   }
 
-  public func sign(
-    _ data: Data,
-    for address: Address,
-    callback: @escaping (_ sig: Data, _ recoveryID: UInt) -> Void
-  ) throws {
-    var digestForData = [UInt8](data.sha3(.keccak256))
-    var unsafeSignature = secp256k1_ecdsa_recoverable_signature.init()
-
-    try mapToCryptoKey(for: address) { privateKey throws in
-      let result = secp256k1_ecdsa_sign_recoverable(
-        self.secp256k1Context,
-        &unsafeSignature,
-        &digestForData,
-        privateKey,
-        secp256k1_nonce_function_rfc6979,
-        nil
-      )
-      guard result == 1 else {
-        throw EtherKitError.keyManagerFailed(reason: .signatureFailed)
-      }
-
-      let signatureBytesPtr: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: 64)
-      var recoveryID: Int32 = 0
-      secp256k1_ecdsa_recoverable_signature_serialize_compact(
-        self.secp256k1Context,
-        signatureBytesPtr,
-        &recoveryID,
-        &unsafeSignature
-      )
-      let signatureBytes: [UInt8] = (0 ..< Int(64)).map { return signatureBytesPtr[$0] }
-
-      callback(Data(bytes: signatureBytes), UInt(recoveryID))
-    }
-  }
-
-  public func verify(
-    _ signature: Data,
-    address: Address,
-    digest: Data,
-    callback: @escaping (_ isValid: Bool) -> Void
-  ) throws {
-    try mapToCryptoKey(for: address) { privateKey in
-      var privateKey = privateKey
-      var publicKey = secp256k1_pubkey.init()
-      secp256k1_ec_pubkey_create(self.secp256k1Context, &publicKey, &privateKey)
-
-      var signatureBytes = [UInt8](signature)
-      var signature = secp256k1_ecdsa_signature.init()
-      secp256k1_ecdsa_signature_parse_compact(self.secp256k1Context, &signature, &signatureBytes)
-
-      var digestBytes = [UInt8](digest)
-      let validateResult = secp256k1_ecdsa_verify(self.secp256k1Context, &signature, &digestBytes, &publicKey)
-      callback(validateResult == 1)
-    }
-  }
-
   // Destroy the context, if created for secp256k1
 
   // Creating a key-pair consists of creating two new curves:
   // 1. A SECP-256r1 curve.  This keypair sits in the secure element on the device.
   // 2. a SECP-256k1 curve.  This keypair is encrypted in keychain using the SE key.
-  public func create(
-    config _: PairConfig,
-    completion: @escaping (Result<Address, EtherKitError>) -> Void
-  ) {
+  public func createKeyPair(completion: @escaping (Result<Address, EtherKitError>) -> Void) {
     DispatchQueue.global(qos: .default).async {
       // overwrite data in memory
       var secp256k1PrivateBytes = [UInt8](repeating: 0, count: Constants.bytesInSecp256k1PrivateKey)
@@ -223,6 +156,8 @@ public final class KeyManager {
       completion(.success(newAddress))
     }
   }
+  
+  // MARK: Internal API
 
   private func mapToCryptoKey(for address: Address, block: @escaping (_ privateKey: [UInt8]) throws -> Void) throws {
     // Scrub this from memory
@@ -263,5 +198,61 @@ public final class KeyManager {
     }
 
     try block([UInt8](decryptedCryptoKey as! Data))
+  }
+  
+  func signRaw(
+    _ data: Data,
+    for address: Address,
+    callback: @escaping (_ sig: Data, _ recoveryID: UInt) -> Void
+  ) throws {
+    var digestForData = [UInt8](data.sha3(.keccak256))
+    var unsafeSignature = secp256k1_ecdsa_recoverable_signature.init()
+    
+    try mapToCryptoKey(for: address) { privateKey throws in
+      let result = secp256k1_ecdsa_sign_recoverable(
+        self.secp256k1Context,
+        &unsafeSignature,
+        &digestForData,
+        privateKey,
+        secp256k1_nonce_function_rfc6979,
+        nil
+      )
+      guard result == 1 else {
+        throw EtherKitError.keyManagerFailed(reason: .signatureFailed)
+      }
+      
+      let signatureBytesPtr: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: 64)
+      var recoveryID: Int32 = 0
+      secp256k1_ecdsa_recoverable_signature_serialize_compact(
+        self.secp256k1Context,
+        signatureBytesPtr,
+        &recoveryID,
+        &unsafeSignature
+      )
+      let signatureBytes: [UInt8] = (0 ..< Int(64)).map { return signatureBytesPtr[$0] }
+      
+      callback(Data(bytes: signatureBytes), UInt(recoveryID))
+    }
+  }
+  
+  func verifyRaw(
+    _ signature: Data,
+    address: Address,
+    digest: Data,
+    callback: @escaping (_ isValid: Bool) -> Void
+  ) throws {
+    try mapToCryptoKey(for: address) { privateKey in
+      var privateKey = privateKey
+      var publicKey = secp256k1_pubkey.init()
+      secp256k1_ec_pubkey_create(self.secp256k1Context, &publicKey, &privateKey)
+      
+      var signatureBytes = [UInt8](signature)
+      var signature = secp256k1_ecdsa_signature.init()
+      secp256k1_ecdsa_signature_parse_compact(self.secp256k1Context, &signature, &signatureBytes)
+      
+      var digestBytes = [UInt8](digest)
+      let validateResult = secp256k1_ecdsa_verify(self.secp256k1Context, &signature, &digestBytes, &publicKey)
+      callback(validateResult == 1)
+    }
   }
 }

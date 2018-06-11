@@ -2,30 +2,64 @@
 //  SendTransaction.swift
 //  EtherKit
 //
-//  Created by Cole Potrocky on 3/28/18.
+//  Created by Cole Potrocky on 3/23/18.
 //
 
 import Marshal
 
 public struct SendTransaction {
-  let from: Address
-  let to: Address?
-  let gas: UInt256?
-  let gasPrice: UInt256?
-  let value: UInt256?
-  let data: GeneralData = GeneralData(data: Data())
+
+  public let value: UInt256
+  public let to: Address
+  public let data: GeneralData
+  public let nonce: UInt256
+  public let gasLimit: UInt256
+  public let gasPrice: UInt256
+
+  public init(
+    to: Address,
+    value: UInt256,
+    gasLimit: UInt256,
+    gasPrice: UInt256,
+    nonce: UInt256,
+    data: GeneralData = GeneralData(data: Data())
+  ) {
+    self.nonce = nonce
+    self.to = to
+    self.gasLimit = gasLimit
+    self.gasPrice = gasPrice
+    self.value = value
+    self.data = data
+  }
+}
+
+extension SendTransaction: RLPComplexType {
+  public func toRLPValue() -> [RLPValueType] {
+    return [nonce, gasPrice, gasLimit, to, value, data]
+  }
 }
 
 extension SendTransaction: Marshaling {
   public func marshaled() -> [String: Any] {
-    let toDict: [String: CustomStringConvertible?] = [
-      "from": from,
+    return [
+      "nonce": nonce as CustomStringConvertible,
       "to": to,
-      "gas": gas,
+      "gasLimit": gasLimit,
       "gasPrice": gasPrice,
       "value": value,
-      "data": data,
-    ]
-    return toDict.filter { _, value in value != nil }.mapValues { String(describing: $0!) }
+      "data": data
+    ].mapValues { String(describing: $0) }
+  }
+}
+
+extension SendTransaction: Signable {
+  public func signatureData(_ network: Network?) -> Data {
+    guard let network = network else {
+      return RLPData.encode(from: toRLPValue()).data
+    }
+    
+    return RLPData.encode(
+      from: toRLPValue() + Signature(v: network.rawValue, r: 0.packedData, s: 0.packedData).toRLPValue()
+    ).data
   }
 }
