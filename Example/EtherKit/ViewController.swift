@@ -12,13 +12,8 @@ import PromiseKit
 import UIKit
 
 class ViewController: UIViewController {
-  // Keep one reference to EtherKit per app.
-  private lazy var etherKit: EtherKit = {
-    EtherKit(
-      URL(string: "http://localhost:8545")!,
-      connectionMode: .http,
-      applicationTag: "io.vault.etherkit.example"
-    )
+  private lazy var etherKeyManager: EtherKeyManager = {
+    EtherKeyManager(applicationTag: "org.cocoapods.demo.EtherKit-Example")
   }()
 
   private var generatedAddress: Address! {
@@ -35,8 +30,8 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    firstly {
-      when(fulfilled: etherKit.createKeyPair(.promise), etherKit.createKeyPair(.promise))
+    _ = firstly {
+      when(fulfilled: etherKeyManager.createKeyPair(.promise), etherKeyManager.createKeyPair(.promise))
     }.done { address1, address2 in
       self.generatedAddress = address1
       self.toAddress = address2
@@ -49,25 +44,25 @@ class ViewController: UIViewController {
   }
 
   @IBAction func onTap(_: UIButton) {
-    etherKit.sign(
-      with: generatedAddress,
-      transaction: TransactionCall(
-        nonce: UInt256(0),
-        to: toAddress!,
-        gasLimit: try! UInt256(describing: "0xff"),
-        gasPrice: try! UInt256(describing: "0xfacefaceface"),
-        value: try! UInt256(describing: "0xffffface")
-      ),
-      network: .main
-    ) {
-      self.signedTransactionField.text = String(describing: $0.value!.marshaled())
+    
+    let fakeTransaction = SendTransaction(
+      to: toAddress,
+      value: UInt256(45),
+      gasLimit: UInt256(90000),
+      gasPrice: UInt256(400000000000),
+      nonce: UInt256(1)
+    )
+    
+    fakeTransaction.sign(using: etherKeyManager, with: generatedAddress, network: .main) { signature in
+      var transactionValues = fakeTransaction.marshaled()
+      transactionValues.merge(signature.value!.marshaled(), uniquingKeysWith: { a, _ in a })
+      self.signedTransactionField.text = String(describing: transactionValues)
     }
   }
 
   @IBAction func onPMTap(_: UIButton) {
-    let message = "this is a test message to sign"
-    etherKit.sign(message: message, network: .main, for: generatedAddress) {
-      self.signedTransactionField.text = String(describing: $0.value!.marshaled())
+    "this is a test message to sign".sign(using: etherKeyManager, with: generatedAddress, network: .main) { signature in
+      self.signedTransactionField.text = String(describing: signature.value!.marshaled())
     }
   }
 }
