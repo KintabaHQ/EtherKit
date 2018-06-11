@@ -34,10 +34,11 @@ extension EtherQuery {
     using manager: EtherKeyManager,
     from: Address,
     to: Address,
-    value: UInt256
+    value: UInt256,
+    data: GeneralData? = nil
   ) -> Promise<Hash> {
     return Promise { seal in
-      self.send(using: manager, from: from, to: to, value: value) { seal.resolve($0.value, $0.error) }
+      self.send(using: manager, from: from, to: to, value: value, data: data) { seal.resolve($0.value, $0.error) }
     }
   }
 }

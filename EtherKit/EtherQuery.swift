@@ -152,6 +152,7 @@ public final class EtherQuery {
     from: Address,
     to: Address,
     value: UInt256,
+    data: GeneralData? = nil,
     completion: @escaping (Result<Hash, EtherKitError>) -> Void
   ) {
     request(
@@ -170,7 +171,8 @@ public final class EtherQuery {
           value: value,
           gasLimit: UInt256(90000),
           gasPrice: networkGasPrice,
-          nonce: nonce
+          nonce: nonce,
+          data: data ?? GeneralData(data: Data())
         )
           
         transaction.sign(using: manager, with: from, network: network) { result in

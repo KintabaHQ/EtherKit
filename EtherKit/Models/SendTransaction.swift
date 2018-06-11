@@ -22,7 +22,7 @@ public struct SendTransaction {
     gasLimit: UInt256,
     gasPrice: UInt256,
     nonce: UInt256,
-    data: GeneralData = GeneralData(data: Data())
+    data: GeneralData
   ) {
     self.nonce = nonce
     self.to = to

@@ -50,7 +50,8 @@ class ViewController: UIViewController {
       value: UInt256(45),
       gasLimit: UInt256(90000),
       gasPrice: UInt256(400000000000),
-      nonce: UInt256(1)
+      nonce: UInt256(1),
+      data: GeneralData(data: Data())
     )
     
     fakeTransaction.sign(using: etherKeyManager, with: generatedAddress, network: .main) { signature in
