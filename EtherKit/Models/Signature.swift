@@ -17,7 +17,7 @@ public protocol Signable {
     with address: Address,
     network: Network?,
     completion: @escaping (Result<Signature, EtherKitError>) -> Void
-  ) throws
+  )
 }
 
 public extension Signable {
