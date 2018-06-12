@@ -11,7 +11,7 @@ public struct Transaction {
   let hash: Hash
   let nonce: UInt256
   let blockHash: Hash
-  let blockNumber: UInt256
+  let blockNumber: UInt256?
   let transactionIndex: UInt256?
   let from: Address
   let to: Address

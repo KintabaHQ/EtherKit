@@ -9,9 +9,11 @@ final class URLRequestManager: RequestManager {
   let url: URL
 
   private var pendingRequests = [RequestIDKey: URLSessionDataTask]()
+  private var extraRequestHeaders: [String: String]?
 
-  init(for url: URL) {
+  init(for url: URL, extraRequestHeaders: [String: String]? = nil) {
     self.url = url
+    self.extraRequestHeaders = extraRequestHeaders
   }
 
   func queueRequest(_ key: RequestIDKey, request: String, callback: @escaping (Any) -> Void) {
@@ -19,6 +21,8 @@ final class URLRequestManager: RequestManager {
     pendingRequests.removeValue(forKey: key)
 
     var urlRequest = URLRequest(url: url)
+    extraRequestHeaders?.forEach { header, value in urlRequest.setValue(value, forHTTPHeaderField: header) }
+
     urlRequest.httpMethod = "POST"
     urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     urlRequest.httpBody = request.data(using: .utf8)

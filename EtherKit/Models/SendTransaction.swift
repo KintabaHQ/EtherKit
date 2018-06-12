@@ -8,7 +8,6 @@
 import Marshal
 
 public struct SendTransaction {
-
   public let value: UInt256
   public let to: Address
   public let data: GeneralData
@@ -47,7 +46,7 @@ extension SendTransaction: Marshaling {
       "gasLimit": gasLimit,
       "gasPrice": gasPrice,
       "value": value,
-      "data": data
+      "data": data,
     ].mapValues { String(describing: $0) }
   }
 }
@@ -57,7 +56,7 @@ extension SendTransaction: Signable {
     guard let network = network else {
       return RLPData.encode(from: toRLPValue()).data
     }
-    
+
     return RLPData.encode(
       from: toRLPValue() + Signature(v: network.rawValue, r: 0.packedData, s: 0.packedData).toRLPValue()
     ).data
