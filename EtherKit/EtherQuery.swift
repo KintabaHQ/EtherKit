@@ -55,6 +55,13 @@ public final class EtherQuery {
   public func blockNumber() -> BlockNumberRequest {
     return BlockNumberRequest()
   }
+  
+  public func block(_ blockNumber: BlockNumber, fullTransactionObjects: Bool = false) -> GetBlockByNumberRequest {
+    return GetBlockByNumberRequest(GetBlockByNumberRequest.Parameters(
+      blockNumber: blockNumber,
+      fullTransactionObjects: fullTransactionObjects
+    ))
+  }
 
   public func gasPrice() -> GasPriceRequest {
     return GasPriceRequest()

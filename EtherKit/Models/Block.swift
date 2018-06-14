@@ -7,13 +7,13 @@
 
 import Marshal
 
-enum BlockTransactions {
+public enum BlockTransactions {
   case hashes([Hash])
   case transactions([Transaction])
 }
 
 extension BlockTransactions: ValueType {
-  static func value(from object: Any) throws -> BlockTransactions {
+  public static func value(from object: Any) throws -> BlockTransactions {
     if let valueAsHash = object as? [String] {
       return try .hashes(valueAsHash.map { try Hash(describing: $0) })
     }
@@ -31,7 +31,7 @@ extension BlockTransactions: ValueType {
 extension BlockTransactions: RawRepresentable {
   public typealias RawValue = [Any]
 
-  init?(rawValue: [Any]) {
+  public init?(rawValue: [Any]) {
     if let valueAsHash = rawValue as? [String] {
       guard let hashes = try? valueAsHash.map(Hash.value) else {
         return nil
@@ -45,7 +45,7 @@ extension BlockTransactions: RawRepresentable {
     self = .transactions(transactions)
   }
 
-  var rawValue: [Any] {
+  public var rawValue: [Any] {
     switch self {
     case let .hashes(hashes):
       return hashes.map { String(describing: $0) }
@@ -56,25 +56,25 @@ extension BlockTransactions: RawRepresentable {
 }
 
 public struct Block: Unmarshaling, Marshaling {
-  let number: UInt256
-  let hash: Hash
-  let parentHash: Hash
-  let nonce: Nonce
-  let sha3Uncles: Hash
-  let logsBloom: BloomFilter
-  let transactionsRoot: Hash
-  let stateRoot: Hash
-  let receiptsRoot: Hash
-  let miner: Address
-  let difficulty: UInt256
-  let totalDifficulty: UInt256
-  let extraData: GeneralData
-  let size: UInt256
-  let gasLimit: UInt256
-  let gasUsed: UInt256
-  let timestamp: UInt256
-  let uncles: [Hash]
-  let transactions: BlockTransactions
+  public let number: UInt256?
+  public let hash: Hash?
+  public let parentHash: Hash
+  public let nonce: Nonce?
+  public let sha3Uncles: Hash
+  public let logsBloom: BloomFilter?
+  public let transactionsRoot: Hash
+  public let stateRoot: Hash
+  public let receiptsRoot: Hash
+  public let miner: Address
+  public let difficulty: UInt256
+  public let totalDifficulty: UInt256
+  public let extraData: GeneralData
+  public let size: UInt256
+  public let gasLimit: UInt256
+  public let gasUsed: UInt256
+  public let timestamp: UInt256
+  public let uncles: [Hash]
+  public let transactions: BlockTransactions
 
   public init(object: MarshaledObject) throws {
     number = try object.value(for: "number")
