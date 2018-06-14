@@ -8,7 +8,7 @@
 public class GasPriceRequest: Request {
   public typealias Parameters = Void
   public typealias Result = UInt256
-  
+
   public var method: String {
     return "eth_gasPrice"
   }

@@ -8,17 +8,17 @@
 import Marshal
 
 public struct Transaction {
-  let hash: Hash
-  let nonce: UInt256
-  let blockHash: Hash
-  let blockNumber: UInt256
-  let transactionIndex: UInt256?
-  let from: Address
-  let to: Address
-  let value: UInt256
-  let gasPrice: UInt256
-  let gas: UInt256
-  let input: GeneralData
+  public let hash: Hash
+  public let nonce: UInt256
+  public let blockHash: Hash
+  public let blockNumber: UInt256?
+  public let transactionIndex: UInt256?
+  public let from: Address
+  public let to: Address
+  public let value: UInt256
+  public let gasPrice: UInt256
+  public let gas: UInt256
+  public let input: GeneralData
 }
 
 extension Transaction: Unmarshaling {

@@ -6,12 +6,12 @@
 //
 
 import BigInt
-import Result
 import Marshal
+import Result
 
 public protocol Signable {
   func signatureData(_ network: Network?) -> Data
-  
+
   func sign(
     using manager: EtherKeyManager,
     with address: Address,
@@ -71,7 +71,7 @@ public struct Signature: Marshaling, RLPComplexType, CustomStringConvertible {
   public var v: UInt
   public var r: Data
   public var s: Data
-  
+
   public init(v: UInt, r: Data, s: Data) {
     self.v = v
     self.r = r
@@ -92,9 +92,9 @@ public struct Signature: Marshaling, RLPComplexType, CustomStringConvertible {
     let sigData = r + s + v.packedData
     return sigData.paddedHexString
   }
-  
+
   // MARK: - RLPComplexType
-  
+
   public func toRLPValue() -> [RLPValueType] {
     return [v, r, s]
   }

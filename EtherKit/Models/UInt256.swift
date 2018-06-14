@@ -8,7 +8,7 @@
 import BigInt
 import Marshal
 
-public struct UInt256 {
+public struct UInt256: Equatable {
   public let describing: BigUInt
 
   public init(_ value: BigUInt) {

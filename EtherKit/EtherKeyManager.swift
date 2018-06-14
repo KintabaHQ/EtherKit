@@ -156,7 +156,7 @@ public final class EtherKeyManager {
       completion(.success(newAddress))
     }
   }
-  
+
   // MARK: Internal API
 
   private func mapToCryptoKey(for address: Address, block: @escaping (_ privateKey: [UInt8]) throws -> Void) throws {
@@ -199,7 +199,7 @@ public final class EtherKeyManager {
 
     try block([UInt8](decryptedCryptoKey as! Data))
   }
-  
+
   func signRaw(
     _ data: Data,
     for address: Address,
@@ -207,7 +207,7 @@ public final class EtherKeyManager {
   ) throws {
     var digestForData = [UInt8](data.sha3(.keccak256))
     var unsafeSignature = secp256k1_ecdsa_recoverable_signature.init()
-    
+
     try mapToCryptoKey(for: address) { privateKey throws in
       let result = secp256k1_ecdsa_sign_recoverable(
         self.secp256k1Context,
@@ -220,7 +220,7 @@ public final class EtherKeyManager {
       guard result == 1 else {
         throw EtherKitError.keyManagerFailed(reason: .signatureFailed)
       }
-      
+
       let signatureBytesPtr: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: 64)
       var recoveryID: Int32 = 0
       secp256k1_ecdsa_recoverable_signature_serialize_compact(
@@ -230,11 +230,11 @@ public final class EtherKeyManager {
         &unsafeSignature
       )
       let signatureBytes: [UInt8] = (0 ..< Int(64)).map { return signatureBytesPtr[$0] }
-      
+
       callback(Data(bytes: signatureBytes), UInt(recoveryID))
     }
   }
-  
+
   func verifyRaw(
     _ signature: Data,
     address: Address,
@@ -245,11 +245,11 @@ public final class EtherKeyManager {
       var privateKey = privateKey
       var publicKey = secp256k1_pubkey.init()
       secp256k1_ec_pubkey_create(self.secp256k1Context, &publicKey, &privateKey)
-      
+
       var signatureBytes = [UInt8](signature)
       var signature = secp256k1_ecdsa_signature.init()
       secp256k1_ecdsa_signature_parse_compact(self.secp256k1Context, &signature, &signatureBytes)
-      
+
       var digestBytes = [UInt8](digest)
       let validateResult = secp256k1_ecdsa_verify(self.secp256k1Context, &signature, &digestBytes, &publicKey)
       callback(validateResult == 1)

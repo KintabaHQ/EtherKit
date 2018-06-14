@@ -32,7 +32,7 @@ public protocol Request: AnyObject, Marshaling {
   var parameters: Parameters { get }
   var id: String? { get }
 
-  func result(from result: Any) throws -> Result
+  func result(from result: Any?) throws -> Result
   func response(from response: Any) throws -> Result
 }
 
@@ -120,8 +120,11 @@ extension Request where Result: ValueType {
     }
   }
 
-  public func result(from result: Any) throws -> Result.Value {
-    return try Result.value(from: result)
+  public func result(from result: Any?) throws -> Result.Value {
+    guard let nonNullableResult = result else {
+      throw MarshalError.typeMismatch(expected: Any.self, actual: type(of: result))
+    }
+    return try Result.value(from: nonNullableResult)
   }
 }
 

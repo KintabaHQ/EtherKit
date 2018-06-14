@@ -11,19 +11,25 @@ import Starscream
 class WebSocketManager: WebSocketDelegate, RequestManager {
   // The URL of the WebSocket server
   let url: URL
+  private var extraRequestHeaders: [String: String]?
   // Pending requests that are queued to write once the socket connects
   private var pendingRequests: [String] = []
   // Pending responses that have not yet been fulfilled.
   private var pendingResponses: [RequestIDKey: (_ response: Any) -> Void] = [:]
   lazy var socket: WebSocket = {
-    let webSocket = WebSocket(url: url)
+    var request = URLRequest(url: url)
+    extraRequestHeaders?.forEach { values in
+      let (header, value) = values
+      request.setValue(value, forHTTPHeaderField: header)
+    }
+    let webSocket = WebSocket(request: request)
     webSocket.delegate = self
-    webSocket.connect()
     return webSocket
   }()
 
-  init(for url: URL) {
+  init(for url: URL, extraRequestHeaders: [String: String]? = nil) {
     self.url = url
+    self.extraRequestHeaders = extraRequestHeaders
   }
 
   // MARK: - RequestManager
@@ -34,10 +40,15 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
     callback: @escaping (_ response: Any) -> Void
   ) {
     pendingResponses[key] = callback
-    if !socket.isConnected {
-      socket.connect()
+
+    // If the socket is connected, write right away.
+    if socket.isConnected {
+      socket.write(string: request)
+      return
     }
+
     pendingRequests.append(request)
+    socket.connect()
   }
 
   // MARK: - WebSocketDelegate
@@ -60,9 +71,9 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
 
     var maybeIDKey: RequestIDKey?
     if let batchResponse = unserialized as? [[String: Any]] {
-      maybeIDKey = try? .batch(batchResponse.map { try $0.value(for: "id") })
+      maybeIDKey = try?.batch(batchResponse.map { try $0.value(for: "id") })
     } else if let singleResponse = unserialized as? [String: Any] {
-      maybeIDKey = try? .single(try singleResponse.value(for: "id"))
+      maybeIDKey = try?.single(singleResponse.value(for: "id"))
     }
 
     guard let idKey = maybeIDKey,

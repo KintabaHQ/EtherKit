@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Result
 import Marshal
+import Result
 
 public final class EtherQuery {
   public enum ConnectionMode {
@@ -16,46 +16,59 @@ public final class EtherQuery {
   }
 
   private let connectionMode: ConnectionMode
+  private let extraRequestHeaders: [String: String]?
   private let url: URL
-  
+
   private lazy var manager: RequestManager = {
     switch connectionMode {
     case .http:
-      return URLRequestManager(for: url)
+      return URLRequestManager(for: url, extraRequestHeaders: extraRequestHeaders)
     case .websocket:
-      return WebSocketManager(for: url)
+      return WebSocketManager(for: url, extraRequestHeaders: extraRequestHeaders)
     }
   }()
-  
-  public init(_ url: URL, connectionMode: ConnectionMode) {
+
+  public init(_ url: URL, connectionMode: ConnectionMode, extraRequestHeaders: [String: String]? = nil) {
     self.url = url
     self.connectionMode = connectionMode
+    self.extraRequestHeaders = extraRequestHeaders
   }
-  
+
   // MARK: JSONRPC Request Implementations
-  
+
   public func networkVersion() -> NetVersionRequest {
     return NetVersionRequest()
   }
-  
+
   public func balanceOf(_ address: Address, blockNumber: BlockNumber = .latest) -> GetBalanceRequest {
     return GetBalanceRequest(GetBalanceRequest.Parameters(address: address, blockNumber: blockNumber))
   }
-  
+
   public func transactionCount(_ address: Address, blockNumber: BlockNumber = .latest) -> GetTransactionCountRequest {
     return GetTransactionCountRequest(GetTransactionCountRequest.Parameters(address: address, blockNumber: blockNumber))
   }
-  
+
+  public func transaction(_ hash: Hash) -> GetTransactionByHashRequest {
+    return GetTransactionByHashRequest(GetTransactionByHashRequest.Parameters(hash: hash))
+  }
+
   public func blockNumber() -> BlockNumberRequest {
     return BlockNumberRequest()
   }
   
+  public func block(_ blockNumber: BlockNumber, fullTransactionObjects: Bool = false) -> GetBlockByNumberRequest {
+    return GetBlockByNumberRequest(GetBlockByNumberRequest.Parameters(
+      blockNumber: blockNumber,
+      fullTransactionObjects: fullTransactionObjects
+    ))
+  }
+
   public func gasPrice() -> GasPriceRequest {
     return GasPriceRequest()
   }
-  
+
   // MARK: Request Dispatchers
-  
+
   public func request<T: Request>(
     _ request: T,
     completion: @escaping (Result<T.Result, EtherKitError>) -> Void
@@ -64,7 +77,7 @@ public final class EtherQuery {
       completion(.failure(EtherKitError.jsonRPCFailed(reason: .invalidRequestJSON)))
       return
     }
-    
+
     manager.queueRequest(
       .single(request.id),
       request: requestAsDatum
@@ -78,7 +91,7 @@ public final class EtherQuery {
       }
     }
   }
-  
+
   public func request<T1: Request, T2: Request>(
     _ request1: T1,
     _ request2: T2,
@@ -86,11 +99,11 @@ public final class EtherQuery {
   ) {
     guard let requestsAsData = try? JSONSerialization.data(
       withJSONObject: [request1.marshaled(), request2.marshaled()]
-      ) else {
-        completion(.failure(.jsonRPCFailed(reason: .invalidRequestJSON)))
-        return
+    ) else {
+      completion(.failure(.jsonRPCFailed(reason: .invalidRequestJSON)))
+      return
     }
-    
+
     manager.queueRequest(
       .batch([request1.id, request2.id]),
       request: requestsAsData
@@ -100,7 +113,7 @@ public final class EtherQuery {
         completion(.failure(.jsonRPCFailed(reason: .parseError(error: marshalError))))
         return
       }
-      
+
       let result1 = responses.compactMap { try? request1.response(from: $0) }.first
       let result2 = responses.compactMap { try? request2.response(from: $0) }.first
       guard result1 != nil && result2 != nil else {
@@ -110,7 +123,7 @@ public final class EtherQuery {
       completion(.success((result1!, result2!)))
     }
   }
-  
+
   public func request<T1: Request, T2: Request, T3: Request>(
     _ request1: T1,
     _ request2: T2,
@@ -119,11 +132,11 @@ public final class EtherQuery {
   ) {
     guard let requestsAsData = try? JSONSerialization.data(
       withJSONObject: [request1.marshaled(), request2.marshaled(), request3.marshaled()]
-      ) else {
-        completion(.failure(.jsonRPCFailed(reason: .invalidRequestJSON)))
-        return
+    ) else {
+      completion(.failure(.jsonRPCFailed(reason: .invalidRequestJSON)))
+      return
     }
-    
+
     manager.queueRequest(
       .batch([request1.id, request2.id, request3.id]),
       request: requestsAsData
@@ -133,7 +146,7 @@ public final class EtherQuery {
         completion(.failure(.jsonRPCFailed(reason: .parseError(error: marshalError))))
         return
       }
-      
+
       let result1 = responses.compactMap { try? request1.response(from: $0) }.first
       let result2 = responses.compactMap { try? request2.response(from: $0) }.first
       let result3 = responses.compactMap { try? request3.response(from: $0) }.first
@@ -144,9 +157,9 @@ public final class EtherQuery {
       completion(.success((result1!, result2!, result3!)))
     }
   }
-  
+
   // MARK: Mutative Requests
-  
+
   public func send(
     using manager: EtherKeyManager,
     from: Address,
@@ -158,7 +171,7 @@ public final class EtherQuery {
     request(
       networkVersion(),
       transactionCount(from, blockNumber: .pending),
-      self.gasPrice()
+      gasPrice()
     ) { result in
       switch result {
       case let .failure(error):
@@ -174,7 +187,7 @@ public final class EtherQuery {
           nonce: nonce,
           data: data ?? GeneralData(data: Data())
         )
-          
+
         transaction.sign(using: manager, with: from, network: network) { result in
           switch result {
           case let .failure(error):
