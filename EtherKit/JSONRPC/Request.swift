@@ -134,7 +134,7 @@ extension Request where Result == Void {
     return nil
   }
 
-  func response(from _: Any?) throws -> Result {
+  func response(from _: Any) throws -> Result {
     return ()
   }
 }
