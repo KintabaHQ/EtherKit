@@ -30,6 +30,8 @@ public struct Web3CommandObject: ValueType {
             commandObject.value = valueString
         } else if let typedDataValue = try? TypedData.value(from: object) {
             commandObject.typedData = typedDataValue
+        } else {
+            throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
         
         return commandObject
@@ -47,7 +49,7 @@ public struct Web3Command: ValueType {
             let name: Web3Method = try? raw.value(for: "name"),
             let id: Int = try? raw.value(for: "id"),
             let object: [String: Web3CommandObject] = try? raw.value(for: "object") else {
-            fatalError()
+            throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
         
         return Web3Command(name: name, id: id, object: object)

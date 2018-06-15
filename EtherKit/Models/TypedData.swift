@@ -16,6 +16,10 @@ public struct TypeProperty: Unmarshaling {
         name = try object.value(for: "name")
         type = try object.value(for: "type")
     }
+    
+    public func encode() -> String {
+        return "\(type) \(name)"
+    }
 }
 
 public struct Type: ValueType {
@@ -24,6 +28,36 @@ public struct Type: ValueType {
     public static func value(from object: Any) throws -> Type {
         let propertyArray: [TypeProperty] = try [TypeProperty].value(from: object)
         return Type(properties: propertyArray)
+    }
+    
+    public func encodeProperties() -> String {
+        let encodedProps = properties.map { prop in
+            return prop.encode()
+        }
+        return "(" + encodedProps.joined(separator: ",") + ")"
+    }
+    
+    public func getSubTypes() -> [String] {
+        let standardTypes: [String] = ["bool", "uint", "int", "string", "address", "bytes"]
+        
+        let subTypes: [String] = properties.reduce([String](), { arr, prop in
+            var subType = prop.type
+            let matches = standardTypes.contains { type in
+                return subType.starts(with: type)
+            }
+            if !matches {
+                if subType.contains("[") {
+                    subType = subType.components(separatedBy: "[")[0]
+                }
+                if !arr.contains(subType) {
+                    var newArr: [String] = arr
+                    newArr.append(subType)
+                    return newArr
+                }
+            }
+            return arr
+        })
+        return subTypes
     }
 }
 
@@ -154,5 +188,37 @@ public struct TypedData: ValueType {
         }
         
         return TypedData(types: types, domain: domain, primaryType: primaryType, message: message)
+    }
+    
+    public func getTypeHash() throws -> Data {
+        guard let mainType = types[primaryType] else {
+            fatalError()
+        }
+        
+        var subTypes: [String] = mainType.getSubTypes()
+        var seenTypes: [String] = []
+        while subTypes.count > 0 {
+            let typeName = subTypes.removeFirst()
+            if seenTypes.contains(typeName) {
+                continue
+            }
+            seenTypes.append(typeName)
+            
+            guard let subType = types[typeName] else {
+                fatalError()
+            }
+            subTypes.append(contentsOf: subType.getSubTypes())
+        }
+        
+        seenTypes = seenTypes.sorted()
+        var encodedTypes = "\(primaryType)\(mainType.encodeProperties())"
+        for typeName in seenTypes {
+            guard let subType = types[typeName] else {
+                fatalError()
+            }
+            encodedTypes.append("\(typeName)\(subType.encodeProperties())")
+        }
+
+        return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
     }
 }
