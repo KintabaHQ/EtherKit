@@ -28,9 +28,14 @@ public enum EtherKitError: Error {
     case wrongSize(expected: Int, actual: Int)
     case scalarConversionFailed(forValue: Any, toType: Any)
   }
+    
+  public enum Web3FailureReason {
+    case parsingFailure
+  }
 
   case keyManagerFailed(reason: KeyManagerFailureReason)
   case jsonRPCFailed(reason: JSONRPCFailureReason)
   case dataConversionFailed(reason: DataConversionFailureReason)
+  case web3Failure(reason: Web3FailureReason)
   case unknown(error: Error)
 }
