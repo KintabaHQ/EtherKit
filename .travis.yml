@@ -11,7 +11,6 @@ env:
     - IOS_SDK=iphonesimulator11.3
   matrix:
     - DESTINATION="platform=iOS Simulator,OS=11.3,name=iPhone 8"
-podfile: Example/Podfile
 cache: cocoapods
 before_install:
   - gem install cocoapods
@@ -24,9 +23,9 @@ script:
   - xcodebuild -workspace "$WORKSPACE" -list
 
   # Build EtherKit in Debug mode and run tests
-  - xcodebuild -workspace "$WORKSPACE" -scheme "$EXAMPLE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO test | xcpretty -c
+  - xcodebuild -enableCodeCoverage YES -workspace "$WORKSPACE" -scheme "$EXAMPLE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO test | xcpretty -c
   # Build EtherKit inside example app in Release mode.
-  - xcodebuild -workspace "$WORKSPACE" -scheme "$EXAMPLE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO build | xcpretty -c
+  - xcodebuild -enableCodeCoverage YES -workspace "$WORKSPACE" -scheme "$EXAMPLE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO build | xcpretty -c
 
   # Run cocoapods linter
   - pod lib lint
