@@ -376,3 +376,19 @@ public struct TypedData: ValueType {
         return (typeHash + encodedData).sha3(.keccak256)
     }
 }
+
+extension TypedData: Signable {
+    public func signatureData(_ network: Network?) -> Data {
+        guard let domainSep = try? getDomainSeparator(),
+            let hashedData = try? getHashStruct() else {
+            fatalError()
+        }
+        var data = Data()
+        data.append(0x19)
+        data.append(0x01)
+        data.append(domainSep)
+        data.append(hashedData)
+
+        return data.sha3(.keccak256)
+    }
+}
