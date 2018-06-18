@@ -10,6 +10,17 @@ import Marshal
 public enum UnformattedDataMode {
   case constrained(Int)
   case unlimited
+    
+  static func == (lhs: UnformattedDataMode, rhs: UnformattedDataMode) -> Bool {
+    switch (lhs, rhs) {
+    case let (.constrained(leftVal), .constrained(rightVal)):
+        return leftVal == rightVal
+    case (.unlimited, .unlimited):
+        return true
+    default:
+        return false
+    }
+  }
 }
 
 public protocol UnformattedDataType: CustomStringConvertible, ValueType, RLPValueType, Hashable, Codable {

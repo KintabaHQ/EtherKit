@@ -17,7 +17,7 @@ public struct TypeProperty: Unmarshaling {
         type = try object.value(for: "type")
     }
     
-    public func encode() -> String {
+    public func encodeType() -> String {
         return "\(type) \(name)"
     }
 }
@@ -30,15 +30,8 @@ public struct Type: ValueType {
         return Type(properties: propertyArray)
     }
     
-    public func encodeProperties() -> String {
-        let encodedProps = properties.map { prop in
-            return prop.encode()
-        }
-        return "(" + encodedProps.joined(separator: ",") + ")"
-    }
-    
     public func getSubTypes() -> [String] {
-        let standardTypes: [String] = ["bool", "uint", "int", "string", "address", "bytes"]
+        let standardTypes: [String] = ["bool", "uint", "int", "address", "string", "bytes"]
         
         let subTypes: [String] = properties.reduce([String](), { arr, prop in
             var subType = prop.type
@@ -59,6 +52,13 @@ public struct Type: ValueType {
         })
         return subTypes
     }
+    
+    public func encodeProperties() -> String {
+        let encodedProps = properties.map { prop in
+            return prop.encodeType()
+        }
+        return "(" + encodedProps.joined(separator: ",") + ")"
+    }
 }
 
 public struct Types {
@@ -69,33 +69,33 @@ public struct Types {
         set { types[typeName] = newValue }
     }
     
-    public func getTypeHash(for mainTypeName: String) throws -> Data {
-        guard let mainType = types[mainTypeName] else {
-            fatalError()
+    public func getTypeHash(for typeName: String) throws -> Data {
+        guard let mainType = types[typeName] else {
+            throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
         
         var subTypes: [String] = mainType.getSubTypes()
         var seenTypes: [String] = []
         while subTypes.count > 0 {
-            let typeName = subTypes.removeFirst()
-            if seenTypes.contains(typeName) {
+            let subName = subTypes.removeFirst()
+            if seenTypes.contains(subName) {
                 continue
             }
-            seenTypes.append(typeName)
+            seenTypes.append(subName)
             
-            guard let subType = types[typeName] else {
-                fatalError()
+            guard let subType = types[subName] else {
+                throw EtherKitError.web3Failure(reason: .parsingFailure)
             }
             subTypes.append(contentsOf: subType.getSubTypes())
         }
         
+        var encodedTypes = "\(typeName)\(mainType.encodeProperties())"
         seenTypes = seenTypes.sorted()
-        var encodedTypes = "\(mainTypeName)\(mainType.encodeProperties())"
-        for typeName in seenTypes {
-            guard let subType = types[typeName] else {
-                fatalError()
+        for seenName in seenTypes {
+            guard let subType = types[seenName] else {
+                throw EtherKitError.web3Failure(reason: .parsingFailure)
             }
-            encodedTypes.append("\(typeName)\(subType.encodeProperties())")
+            encodedTypes.append("\(seenName)\(subType.encodeProperties())")
         }
         
         return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
@@ -105,16 +105,53 @@ public struct Types {
 public struct Domain: Unmarshaling {
     public var name: String?
     public var version: String?
-    public var chainId: UInt?
+    public var chainId: BigUInt?
     public var verifyingContract: Address?
-    public var salt: String?
+    public var salt: Data?
     
     public init(object: MarshaledObject) throws {
         name = try object.value(for: "name")
         version = try object.value(for: "version")
-        chainId = try object.value(for: "chainId")
+
+        if let uint: UInt = try? object.value(for: "chainId") {
+            chainId = BigUInt(uint)
+        } else if let string: String = try? object.value(for: "chainId"),
+            let bigUInt = BigUInt(string) {
+            chainId = bigUInt
+        }
+        
         verifyingContract = try object.value(for: "verifyingContract")
-        salt = try object.value(for: "salt")
+        
+        if let string: String = try? object.value(for: "salt") {
+            salt = Data(hex: string)
+        }
+    }
+    
+    public func getDomainSeparator() throws -> Data {
+        var data = Data()
+        if let name = name {
+            data.append(Data(bytes: Array(name.utf8)).sha3(.keccak256))
+        }
+        if let version = version {
+            data.append(Data(bytes: Array(version.utf8)).sha3(.keccak256))
+        }
+        if let chainId = chainId {
+            let valueData = chainId.serialize()
+            let padding = 32 - valueData.count
+            data.append(Data(repeating: 0, count: padding))
+            data.append(valueData)
+        }
+        if let verifyingContract = verifyingContract {
+            let uint = BigUInt(verifyingContract.data)
+            let uintData = uint.serialize()
+            let padding = 32 - uintData.count
+            data.append(Data(repeating: 0, count: padding))
+            data.append(uintData)
+        }
+        if let salt = salt {
+            data.append(salt)
+        }
+        return data.sha3(.keccak256)
     }
 }
 
@@ -122,8 +159,8 @@ public enum MessageValue {
     case bool(value: Bool)
     case uint(size: Int, value: BigUInt)
     case int(size: Int, value: BigInt)
-    case string(value: String)
     case address(value: Address)
+    case string(value: String)
     case bytes(count: UnformattedDataMode, value: Data)
     case array(count: UnformattedDataMode, value: [MessageValue])
     case object(type: String, value: MessageObject)
@@ -156,12 +193,12 @@ public enum MessageValue {
             } else {
                 throw EtherKitError.web3Failure(reason: .parsingFailure)
             }
-        } else if type == "string" {
-            let stringVal = try String.value(from: object)
-            return MessageValue.string(value: stringVal)
         } else if type == "address" {
             let addressVal = try Address.value(from: object)
             return MessageValue.address(value: addressVal)
+        } else if type == "string" {
+            let stringVal = try String.value(from: object)
+            return MessageValue.string(value: stringVal)
         } else if type.starts(with: "bytes") {
             let stringVal = try String.value(from: object)
             let data = Data(hex: stringVal)
@@ -190,8 +227,75 @@ public enum MessageValue {
             guard let subObject = object as? [String: Any] else {
                 throw EtherKitError.web3Failure(reason: .parsingFailure)
             }
-            let messageObject = try MessageObject(from: subObject, types: types, typeString: type)
+            let messageObject = try MessageObject(from: subObject, typeName: type, types: types)
             return MessageValue.object(type: type, value: messageObject)
+        }
+    }
+    
+    public func encodeData(types: Types) throws -> Data {
+        switch self {
+        case let .bool(value):
+            var data = Data()
+            data.append(Data(repeating: 0, count: 31))
+            let valueData: UInt8 = value ? 0x01 : 0x00
+            data.append(valueData)
+            return data
+        case let .uint(_, value):
+            var data = Data()
+            let valueData = value.serialize()
+            let padding = 32 - valueData.count
+            data.append(Data(repeating: 0, count: padding))
+            data.append(valueData)
+            return data
+        case let .int(_, value):
+            let magnitude = value.magnitude
+            var valueData = magnitude.serialize()
+            if value.sign == .minus {
+                let serializedLength = magnitude.serialize().count
+                let max = BigUInt(1) << (serializedLength * 8)
+                valueData = (max - magnitude).serialize()
+            }
+            var data = Data()
+            let padding = 32 - valueData.count
+            if value.sign == .minus {
+                data.append(Data(repeating: 255, count: padding))
+            } else {
+                data.append(Data(repeating: 0, count: padding))
+            }
+            data.append(valueData)
+            return data
+        case let .address(value):
+            var data = Data()
+            let uint = BigUInt(value.data)
+            let uintData = uint.serialize()
+            let padding = 32 - uintData.count
+            data.append(Data(repeating: 0, count: padding))
+            data.append(uintData)
+            return data
+        case let .string(value):
+            let stringData = Data(bytes: Array(value.utf8))
+            return stringData.sha3(.keccak256)
+        case let .bytes(count, value):
+            if count == UnformattedDataMode.unlimited {
+                return value.sha3(.keccak256)
+            } else {
+                var data = Data()
+                let padding = 32 - value.count
+                data.append(value)
+                data.append(Data(repeating: 0, count: padding))
+                return data
+            }
+        case let .array(_, value):
+            var data = Data()
+            for subVal in value {
+                let subData = try subVal.encodeData(types: types)
+                data.append(subData)
+            }
+            return data
+        case let .object(type, value):
+            let typeHash = try types.getTypeHash(for: type)
+            let encodedData = try value.encodeData(typeName: type, types: types)
+            return (typeHash + encodedData).sha3(.keccak256)
         }
     }
 }
@@ -199,8 +303,8 @@ public enum MessageValue {
 public struct MessageObject {
     public var values: [String: MessageValue] = [:]
     
-    public init(from object: [String: Any], types: Types, typeString: String) throws {
-        guard let type = types[typeString] else {
+    public init(from object: [String: Any], typeName: String, types: Types) throws {
+        guard let type = types[typeName] else {
             throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
         for prop in type.properties {
@@ -209,6 +313,24 @@ public struct MessageObject {
             }
             values[prop.name] = try MessageValue.getMessageValue(from: valueObject, type: prop.type, types: types)
         }
+    }
+    
+    public func encodeData(typeName: String, types: Types) throws -> Data {
+        guard let mainType = types[typeName] else {
+            fatalError()
+        }
+        
+        var data = Data()
+        for prop in mainType.properties {
+            guard let subVal = values[prop.name] else {
+                fatalError()
+            }
+            guard let subData = try? subVal.encodeData(types: types) else {
+                fatalError()
+            }
+            data.append(subData)
+        }
+        return data
     }
 }
 
@@ -228,57 +350,28 @@ public struct TypedData: ValueType {
         guard let domain: Domain = try? valueMaps.value(for: "domain"),
             let primaryType: String = try? valueMaps.value(for: "primaryType"),
             let messageObject: [String: Any] = try? valueMaps.value(for: "message"),
-            let message = try? MessageObject(from: messageObject, types: types, typeString: primaryType) else {
+            let message = try? MessageObject(from: messageObject, typeName: primaryType, types: types) else {
             throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
         
         return TypedData(types: types, domain: domain, primaryType: primaryType, message: message)
     }
     
+    public func getDomainSeparator() throws -> Data {
+        return try domain.getDomainSeparator()
+    }
+    
     public func getTypeHash() throws -> Data {
         return try types.getTypeHash(for: primaryType)
     }
     
-    public func getEncodedData() throws -> Data {
-
+    public func encodeData() throws -> Data {
+        return try message.encodeData(typeName: primaryType, types: types)
+    }
+    
+    public func getHashStruct() throws -> Data {
+        let typeHash = try self.getTypeHash()
+        let encodedData = try self.encodeData()
+        return (typeHash + encodedData).sha3(.keccak256)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
