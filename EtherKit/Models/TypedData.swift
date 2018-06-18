@@ -61,6 +61,47 @@ public struct Type: ValueType {
     }
 }
 
+public struct Types {
+    public var types: [String: Type]
+    
+    subscript(typeName: String) -> Type? {
+        get { return types[typeName] }
+        set { types[typeName] = newValue }
+    }
+    
+    public func getTypeHash(for mainTypeName: String) throws -> Data {
+        guard let mainType = types[mainTypeName] else {
+            fatalError()
+        }
+        
+        var subTypes: [String] = mainType.getSubTypes()
+        var seenTypes: [String] = []
+        while subTypes.count > 0 {
+            let typeName = subTypes.removeFirst()
+            if seenTypes.contains(typeName) {
+                continue
+            }
+            seenTypes.append(typeName)
+            
+            guard let subType = types[typeName] else {
+                fatalError()
+            }
+            subTypes.append(contentsOf: subType.getSubTypes())
+        }
+        
+        seenTypes = seenTypes.sorted()
+        var encodedTypes = "\(mainTypeName)\(mainType.encodeProperties())"
+        for typeName in seenTypes {
+            guard let subType = types[typeName] else {
+                fatalError()
+            }
+            encodedTypes.append("\(typeName)\(subType.encodeProperties())")
+        }
+        
+        return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
+    }
+}
+
 public struct Domain: Unmarshaling {
     public var name: String?
     public var version: String?
@@ -87,7 +128,7 @@ public enum MessageValue {
     case array(count: UnformattedDataMode, value: [MessageValue])
     case object(type: String, value: MessageObject)
     
-    public static func getMessageValue(from object: Any, type: String, types: [String: Type]) throws -> MessageValue {
+    public static func getMessageValue(from object: Any, type: String, types: Types) throws -> MessageValue {
         if type == "bool" {
             let boolVal = try Bool.value(from: object)
             return MessageValue.bool(value: boolVal)
@@ -158,7 +199,7 @@ public enum MessageValue {
 public struct MessageObject {
     public var values: [String: MessageValue] = [:]
     
-    public init(from object: [String: Any], types: [String: Type], typeString: String) throws {
+    public init(from object: [String: Any], types: Types, typeString: String) throws {
         guard let type = types[typeString] else {
             throw EtherKitError.web3Failure(reason: .parsingFailure)
         }
@@ -172,15 +213,19 @@ public struct MessageObject {
 }
 
 public struct TypedData: ValueType {
-    public var types: [String: Type]
+    public var types: Types
     public var domain: Domain
     public var primaryType: String
     public var message: MessageObject
     
     public static func value(from object: Any) throws -> TypedData {
         guard let valueMaps = object as? [String: Any],
-            let types: [String: Type] = try? valueMaps.value(for: "types"),
-            let domain: Domain = try? valueMaps.value(for: "domain"),
+            let typeDict: [String: Type] = try? valueMaps.value(for: "types") else {
+            throw EtherKitError.web3Failure(reason: .parsingFailure)
+        }
+        let types: Types = Types(types: typeDict)
+
+        guard let domain: Domain = try? valueMaps.value(for: "domain"),
             let primaryType: String = try? valueMaps.value(for: "primaryType"),
             let messageObject: [String: Any] = try? valueMaps.value(for: "message"),
             let message = try? MessageObject(from: messageObject, types: types, typeString: primaryType) else {
@@ -191,34 +236,49 @@ public struct TypedData: ValueType {
     }
     
     public func getTypeHash() throws -> Data {
-        guard let mainType = types[primaryType] else {
-            fatalError()
-        }
-        
-        var subTypes: [String] = mainType.getSubTypes()
-        var seenTypes: [String] = []
-        while subTypes.count > 0 {
-            let typeName = subTypes.removeFirst()
-            if seenTypes.contains(typeName) {
-                continue
-            }
-            seenTypes.append(typeName)
-            
-            guard let subType = types[typeName] else {
-                fatalError()
-            }
-            subTypes.append(contentsOf: subType.getSubTypes())
-        }
-        
-        seenTypes = seenTypes.sorted()
-        var encodedTypes = "\(primaryType)\(mainType.encodeProperties())"
-        for typeName in seenTypes {
-            guard let subType = types[typeName] else {
-                fatalError()
-            }
-            encodedTypes.append("\(typeName)\(subType.encodeProperties())")
-        }
+        return try types.getTypeHash(for: primaryType)
+    }
+    
+    public func getEncodedData() throws -> Data {
 
-        return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
