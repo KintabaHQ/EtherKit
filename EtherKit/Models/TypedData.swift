@@ -97,7 +97,6 @@ public struct Types {
             }
             encodedTypes.append("\(seenName)\(subType.encodeProperties())")
         }
-        
         return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
     }
 }
@@ -127,7 +126,7 @@ public struct Domain: Unmarshaling {
         }
     }
     
-    public func getDomainSeparator() throws -> Data {
+    public func encodeData() throws -> Data {
         var data = Data()
         if let name = name {
             data.append(Data(bytes: Array(name.utf8)).sha3(.keccak256))
@@ -151,7 +150,7 @@ public struct Domain: Unmarshaling {
         if let salt = salt {
             data.append(salt)
         }
-        return data.sha3(.keccak256)
+        return data
     }
 }
 
@@ -358,7 +357,9 @@ public struct TypedData: ValueType {
     }
     
     public func getDomainSeparator() throws -> Data {
-        return try domain.getDomainSeparator()
+        let typeHash = try types.getTypeHash(for: "EIP712Domain")
+        let encodedData = try domain.encodeData()
+        return (typeHash + encodedData).sha3(.keccak256)
     }
     
     public func getTypeHash() throws -> Data {
