@@ -165,7 +165,7 @@ public enum MemberValue {
   case string(value: String)
   case bytes(count: UnformattedDataMode, value: Data)
   case array(count: UnformattedDataMode, value: [MemberValue])
-  case structuredData(type: String, value: StructTypeData)
+  case structData(type: String, value: StructTypeData)
 
   // Initialize a new member value from a marshaled object
   public init(from object: Any, type: String, types: [String: StructTypeDefinition]) throws {
@@ -230,8 +230,8 @@ public enum MemberValue {
       guard let subObject = object as? [String: Any] else {
         throw EtherKitError.web3Failure(reason: .parsingFailure)
       }
-      let structuredData = try StructTypeData(from: subObject, typeName: type, types: types)
-      self = MemberValue.structuredData(type: type, value: structuredData)
+      let structData = try StructTypeData(from: subObject, typeName: type, types: types)
+      self = MemberValue.structData(type: type, value: structData)
     }
   }
 
@@ -296,7 +296,7 @@ public enum MemberValue {
         data.append(subData)
       }
       return data
-    case let .structuredData(type, value):
+    case let .structData(type, value):
       let typeHash = try types.getTypeHash(for: type)
       let encodedData = try value.encodeData(typeName: type, types: types)
       return (typeHash + encodedData).sha3(.keccak256)
