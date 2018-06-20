@@ -17,9 +17,11 @@ public struct MemberVariable: Unmarshaling {
     name = try object.value(for: "name")
     type = try object.value(for: "type")
   }
+}
 
+extension MemberVariable: CustomStringConvertible {
   // Encodes this member variable
-  public func encodeMember() -> String {
+  public var description: String {
     return "\(type) \(name)"
   }
 }
@@ -34,33 +36,27 @@ public struct StructTypeDefinition: ValueType {
   }
 
   // Returns the collection of struct types used as a member variable by this struct type
-  public func getSubStructTypes() -> [String] {
-    let standardTypes: Set = ["bool", "uint", "int", "address", "string", "bytes"]
+  public func getSubStructTypes() -> Set<String> {
+    let standardTypes: Set<String> = ["bool", "uint", "int", "address", "string", "bytes"]
 
-    let subTypes: [String] = members.reduce([String](), { arr, prop in
-      var subType = prop.type
-      if subType.contains("[") {
-        subType = subType.components(separatedBy: "[")[0]
-      }
+    let subTypes: Set<String> = members.reduce(into: Set<String>(), { set, prop in
+      let subType = prop.type.components(separatedBy: "[")[0]
       let matches = standardTypes.contains { type in
         return subType.starts(with: type)
       }
       if !matches {
-        if !arr.contains(subType) {
-          var newArr: [String] = arr
-          newArr.append(subType)
-          return newArr
-        }
+        set.insert(subType)
       }
-      return arr
     })
     return subTypes
   }
+}
 
+extension StructTypeDefinition: CustomStringConvertible {
   // Encodes the member variables for this struct type
-  public func encodeMembers() -> String {
-    let encodedMems = members.map { member in
-      return member.encodeMember()
+  public var description: String {
+    let encodedMems: [String] = members.map { member in
+      return String(describing: member)
     }
     return "(" + encodedMems.joined(separator: ",") + ")"
   }
@@ -74,28 +70,28 @@ public extension Dictionary where Key == String, Value == StructTypeDefinition {
       throw EtherKitError.web3Failure(reason: .parsingFailure)
     }
 
-    var subTypes: [String] = mainType.getSubStructTypes()
-    var seenTypes: [String] = []
+    var subTypes: Set<String> = mainType.getSubStructTypes()
+    var seenTypes: Set<String> = []
     while subTypes.count > 0 {
       let subName = subTypes.removeFirst()
       if seenTypes.contains(subName) {
         continue
       }
-      seenTypes.append(subName)
+      seenTypes.insert(subName)
 
       guard let subType = self[subName] else {
         throw EtherKitError.web3Failure(reason: .parsingFailure)
       }
-      subTypes.append(contentsOf: subType.getSubStructTypes())
+      subTypes.formUnion(subType.getSubStructTypes())
     }
 
-    var encodedTypes = "\(typeName)\(mainType.encodeMembers())"
-    seenTypes = seenTypes.sorted()
-    for seenName in seenTypes {
+    var encodedTypes = "\(typeName)\(mainType)"
+    let sortedTypes = seenTypes.sorted()
+    for seenName in sortedTypes {
       guard let subType = self[seenName] else {
         throw EtherKitError.web3Failure(reason: .parsingFailure)
       }
-      encodedTypes.append("\(seenName)\(subType.encodeMembers())")
+      encodedTypes.append("\(seenName)\(subType)")
     }
     return Data(bytes: Array(encodedTypes.utf8)).sha3(.keccak256)
   }
