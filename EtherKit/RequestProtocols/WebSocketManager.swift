@@ -60,7 +60,12 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
     pendingRequests = []
   }
 
-  func websocketDidDisconnect(socket _: WebSocketClient, error _: Error?) {
+  func websocketDidDisconnect(socket _: WebSocketClient, error: Error?) {
+    pendingRequests = []
+    for (_, callback) in pendingResponses {
+        callback(error as Any)
+    }
+    pendingResponses = [:]
   }
 
   func websocketDidReceiveMessage(socket _: WebSocketClient, text: String) {
