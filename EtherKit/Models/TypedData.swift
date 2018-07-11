@@ -395,4 +395,8 @@ extension TypedData: Signable {
 
     return data.sha3(.keccak256)
   }
+
+  public var usesReplayProtection: Bool {
+    return true
+  }
 }

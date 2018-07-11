@@ -12,6 +12,8 @@ import Result
 public protocol Signable {
   func signatureData(_ network: Network?) -> Data
 
+  var usesReplayProtection: Bool { get }
+
   func sign(
     using manager: EtherKeyManager,
     with address: Address,
@@ -34,7 +36,7 @@ public extension Signable {
 
         let networkValue = network?.rawValue ?? 0
         completion(.success(Signature(
-          v: recoveryID + 27 + (networkValue > 0 ? networkValue * 2 + 8 : 0),
+          v: recoveryID + 27 + ((self.usesReplayProtection && networkValue > 0) ? networkValue * 2 + 8 : 0),
           r: UInt256(rValueRaw).toPaddedData(),
           s: UInt256(sValueRaw).toPaddedData()
         )))
@@ -51,6 +53,10 @@ extension Data: Signable {
   public func signatureData(_: Network?) -> Data {
     return self
   }
+
+  public var usesReplayProtection: Bool {
+    return false
+  }
 }
 
 extension String: Signable {
@@ -59,11 +65,19 @@ extension String: Signable {
     let prefix = "\u{19}Ethereum Signed Message:\n\(message.count)".data(using: .utf8)!
     return prefix + message
   }
+
+  public var usesReplayProtection: Bool {
+    return false
+  }
 }
 
 extension RLPData: Signable {
   public func signatureData(_: Network?) -> Data {
     return data
+  }
+
+  public var usesReplayProtection: Bool {
+    return false
   }
 }
 

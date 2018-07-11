@@ -36,7 +36,7 @@ extension String {
     return bytes
   }
 
-  var hasHexPrefix: Bool {
+  public var hasHexPrefix: Bool {
     return hasPrefix("0x")
   }
 }
