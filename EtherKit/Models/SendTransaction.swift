@@ -61,4 +61,8 @@ extension SendTransaction: Signable {
       from: toRLPValue() + Signature(v: network.rawValue, r: 0.packedData, s: 0.packedData).toRLPValue()
     ).data
   }
+
+  public var usesReplayProtection: Bool {
+    return true
+  }
 }
