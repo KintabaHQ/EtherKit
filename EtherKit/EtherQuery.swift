@@ -10,6 +10,7 @@ import Marshal
 import Result
 
 public final class EtherQuery {
+  public static let DefaultGasLimit: UInt256 = UInt256(90000)
   public enum ConnectionMode {
     case websocket
     case http
@@ -55,7 +56,7 @@ public final class EtherQuery {
   public func blockNumber() -> BlockNumberRequest {
     return BlockNumberRequest()
   }
-  
+
   public func block(_ blockNumber: BlockNumber, fullTransactionObjects: Bool = false) -> GetBlockByNumberRequest {
     return GetBlockByNumberRequest(GetBlockByNumberRequest.Parameters(
       blockNumber: blockNumber,
@@ -63,8 +64,30 @@ public final class EtherQuery {
     ))
   }
 
+  public func code(_ address: Address, blockNumber: BlockNumber = .latest) -> GetCodeRequest {
+    return GetCodeRequest(GetCodeRequest.Parameters(address: address, blockNumber: blockNumber))
+  }
+
   public func gasPrice() -> GasPriceRequest {
     return GasPriceRequest()
+  }
+
+  public func estimateGasLimit(
+    to: Address,
+    from: Address? = nil,
+    gasLimit: UInt256? = nil,
+    gasPrice: UInt256? = nil,
+    value: UInt256? = nil,
+    data: GeneralData? = nil
+  ) -> EstimateGasRequest {
+    return EstimateGasRequest(EstimateGasRequest.Parameters(
+      from: from,
+      to: to,
+      gasLimit: gasLimit,
+      gasPrice: gasPrice,
+      value: value,
+      data: data
+    ))
   }
 
   // MARK: Request Dispatchers
@@ -158,6 +181,27 @@ public final class EtherQuery {
     }
   }
 
+  public func requestGasEstimate(
+    for transaction: SendTransaction,
+    from address: Address,
+    completion: @escaping (Result<UInt256, EtherKitError>) -> Void
+  ) {
+    request(
+      code(transaction.to),
+      estimateGasLimit(
+        to: transaction.to,
+        from: address,
+        gasPrice: transaction.gasPrice,
+        value: transaction.value, data: transaction.data
+      )
+    ) { result in
+      completion(result.map {
+        let (code, estimatedGasLimit) = $0
+        return code.data.isEmpty ? EtherQuery.DefaultGasLimit : estimatedGasLimit
+      })
+    }
+  }
+
   // MARK: Mutative Requests
 
   public func send(
@@ -172,31 +216,47 @@ public final class EtherQuery {
       networkVersion(),
       transactionCount(from, blockNumber: .pending),
       gasPrice()
-    ) { result in
-      switch result {
+    ) {
+      switch $0 {
       case let .failure(error):
         completion(.failure(error))
       case let .success(items):
         let (network, nonce, networkGasPrice) = items
-
-        let transaction = SendTransaction(
+        let rawTransaction = SendTransaction(
           to: to,
           value: value,
-          gasLimit: UInt256(90000),
+          gasLimit: EtherQuery.DefaultGasLimit,
           gasPrice: networkGasPrice,
           nonce: nonce,
           data: data ?? GeneralData(data: Data())
         )
 
-        transaction.sign(using: manager, with: from, network: network) { result in
-          switch result {
+        self.requestGasEstimate(for: rawTransaction, from: from) {
+          switch $0 {
           case let .failure(error):
             completion(.failure(error))
-          case let .success(signature):
-            let request = SendRawTransactionRequest(SendRawTransactionRequest.Parameters(
-              data: RLPData.encode(from: transaction.toRLPValue() + signature.toRLPValue())
-            ))
-            self.request(request) { completion($0) }
+          case let .success(gasLimit):
+
+            let finalTransaction = SendTransaction(
+              to: rawTransaction.to,
+              value: rawTransaction.value,
+              gasLimit: gasLimit,
+              gasPrice: rawTransaction.gasPrice,
+              nonce: rawTransaction.nonce,
+              data: rawTransaction.data
+            )
+
+            finalTransaction.sign(using: manager, with: from, network: network) {
+              switch $0 {
+              case let .failure(error):
+                completion(.failure(error))
+              case let .success(signature):
+                let request = SendRawTransactionRequest(SendRawTransactionRequest.Parameters(
+                  data: RLPData.encode(from: finalTransaction.toRLPValue() + signature.toRLPValue())
+                ))
+                self.request(request) { completion($0) }
+              }
+            }
           }
         }
       }

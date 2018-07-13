@@ -63,7 +63,7 @@ class WebSocketManager: WebSocketDelegate, RequestManager {
   func websocketDidDisconnect(socket _: WebSocketClient, error: Error?) {
     pendingRequests = []
     for (_, callback) in pendingResponses {
-        callback(error as Any)
+      callback(error as Any)
     }
     pendingResponses = [:]
   }

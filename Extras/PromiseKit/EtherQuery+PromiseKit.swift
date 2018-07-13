@@ -30,6 +30,15 @@ extension EtherQuery {
     }
   }
   
+  public func requestGasEstimate(
+    for transaction: SendTransaction,
+    from address: Address
+  ) -> Promise<UInt256> {
+    return Promise { seal in
+      self.requestGasEstimate(for: transaction, from: address) { seal.resolve($0.value, $0.error) }
+    }
+  }
+  
   public func send(
     using manager: EtherKeyManager,
     from: Address,
