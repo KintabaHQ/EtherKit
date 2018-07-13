@@ -18,18 +18,19 @@ public class EstimateGasRequest: Request {
 
     // MARK: - Marshaling
 
-    public func marshaled() -> [String: Any] {
-      return [
-        "from": from as Any?,
+    public func marshaled() -> [Any] {
+      let dictionary: [String: Any] = [
+        "from": from,
         "to": to,
         "gasLimit": gasLimit,
         "gasPrice": gasPrice,
         "value": value,
         "data": data,
-      ].compactMapValues { value in
+      ].compactMapValues { (value: Any?) in
         guard let value = value else { return nil }
         return String(describing: value)
       }
+      return [dictionary]
     }
   }
 
