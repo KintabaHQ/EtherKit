@@ -18,7 +18,7 @@ struct Response: Unmarshaling {
   init(object: MarshaledObject) throws {
     id = try object.value(for: "id")
     version = try object.value(for: "jsonrpc")
-    result = try object.any(for: "result")
+    result = try object.optionalAny(for: "result")
     error = try object.value(for: "error")
   }
 }
@@ -48,7 +48,7 @@ extension Request {
       )
     }
 
-    guard wrappedResponse.id == id, wrappedResponse.version == version else {
+    guard wrappedResponse.id == id!, wrappedResponse.version == version else {
       throw EtherKitError.jsonRPCFailed(reason: .responseMismatch(requestID: id, responseID: wrappedResponse.id))
     }
 
