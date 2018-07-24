@@ -31,7 +31,7 @@ extension BlockNumber: RawRepresentable {
     case "latest": self = .latest
     case "pending": self = .pending
     default:
-      guard let blockNumber = try? UInt256(describing: rawValue) else {
+      guard let blockNumber = try? UInt256(from: rawValue) else {
         return nil
       }
       self = .specific(blockNumber)
