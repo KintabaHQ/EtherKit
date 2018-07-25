@@ -15,7 +15,7 @@ final class QuantitiesTest: XCTestCase {
   func testInt256Conversion() {
     property("An Int256 packs and unpacks to the same String representation") <- forAll { (uint256: ArbitraryUInt256Str) in
       let value = uint256.value
-      guard let wrappedUInt256 = try? UInt256(describing: value) else {
+      guard let wrappedUInt256 = try? UInt256(from: value) else {
         return false
       }
 

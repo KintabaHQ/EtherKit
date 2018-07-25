@@ -8,24 +8,28 @@
 import BigInt
 import Marshal
 
-public struct UInt256: Equatable {
-  public let describing: BigUInt
+public struct UInt256: Equatable {  
+  public let value: BigUInt
 
-  public init(_ value: BigUInt) {
-    describing = value
+  public init(_ value: BigUInt, from denomination: Denomination = .wei) {
+    self.value = value * denomination.rawValue
+  }
+  
+  public init(_ value: Double, from denomination: Denomination) {
+    self.value = BigUInt(value * Double(denomination.rawValue))
   }
 
-  public init(describing: String) throws {
-    guard let value = BigUInt(describing.dropHexPrefix, radix: 16) else {
+  public init(from: String) throws {
+    guard let value = BigUInt(from.dropHexPrefix, radix: 16) else {
       throw EtherKitError.dataConversionFailed(
-        reason: .scalarConversionFailed(forValue: describing, toType: BigUInt.self)
+        reason: .scalarConversionFailed(forValue: from, toType: BigUInt.self)
       )
     }
     self.init(value)
   }
 
   public func toPaddedData() -> Data {
-    var unpaddedValue = describing.serialize()
+    var unpaddedValue = value.serialize()
     let paddingAmount = 32 - unpaddedValue.count
     return Data(repeating: 0, count: paddingAmount) + unpaddedValue
   }
@@ -33,7 +37,7 @@ public struct UInt256: Equatable {
 
 extension UInt256: CustomStringConvertible {
   public var description: String {
-    return "0x\(String(describing, radix: 16))"
+    return "0x\(String(value, radix: 16))"
   }
 }
 
@@ -43,13 +47,13 @@ extension UInt256: ValueType {
       throw MarshalError.typeMismatch(expected: String.self, actual: type(of: object))
     }
 
-    return try UInt256(describing: intStr)
+    return try UInt256(from: intStr)
   }
 }
 
 extension UInt256: RLPValueType {
   public func toRLPData(lift: @escaping (Data) -> RLPData) -> RLPData {
-    return describing.toRLPData(lift: lift)
+    return value.toRLPData(lift: lift)
   }
 }
 
@@ -61,6 +65,6 @@ extension UInt256: Codable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
-    try self.init(describing: container.decode(String.self))
+    try self.init(from: container.decode(String.self))
   }
 }
