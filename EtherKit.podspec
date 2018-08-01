@@ -28,6 +28,9 @@ Pod::Spec.new do |s|
     core.dependency 'CryptoSwift'
     core.dependency 'secp256k1.swift'
     core.dependency 'Result', '~> 4.0.0'
+    core.resource_bundles = {
+      'WordLists' => ['Assets/WordLists/*.txt']
+    }
   end
 
   s.subspec 'PromiseKit' do |promisekit|
