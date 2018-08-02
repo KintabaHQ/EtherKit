@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D32BB142113696F00E5F097 /* MnemonicTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D32BB132113696F00E5F097 /* MnemonicTest.swift */; };
 		1D45E1762064535A003B2C31 /* UnformattedDataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E1752064535A003B2C31 /* UnformattedDataTest.swift */; };
 		1D45E18120653CA9003B2C31 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E17F20653C96003B2C31 /* TestUtils.swift */; };
 		1D45E1872065427E003B2C31 /* QuantitiesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45E18520654240003B2C31 /* QuantitiesTest.swift */; };
@@ -34,6 +35,7 @@
 /* Begin PBXFileReference section */
 		05FAAF6AD3AC5750603B01BA /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		0D475DBAD0C1BF114B8DA8D8 /* Pods-EtherKit_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EtherKit_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-EtherKit_Tests/Pods-EtherKit_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		1D32BB132113696F00E5F097 /* MnemonicTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MnemonicTest.swift; sourceTree = "<group>"; };
 		1D45E1752064535A003B2C31 /* UnformattedDataTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnformattedDataTest.swift; sourceTree = "<group>"; };
 		1D45E17F20653C96003B2C31 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		1D45E18520654240003B2C31 /* QuantitiesTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantitiesTest.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				1D45E18520654240003B2C31 /* QuantitiesTest.swift */,
 				1DC2F1E9208A734E0021DAF6 /* AddressTest.swift */,
 				1DAC23C12092705400E201C8 /* RLPTest.swift */,
+				1D32BB132113696F00E5F097 /* MnemonicTest.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -401,6 +404,7 @@
 				1D45E18120653CA9003B2C31 /* TestUtils.swift in Sources */,
 				1DC2F1EA208A734E0021DAF6 /* AddressTest.swift in Sources */,
 				1D45E1872065427E003B2C31 /* QuantitiesTest.swift in Sources */,
+				1D32BB142113696F00E5F097 /* MnemonicTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
