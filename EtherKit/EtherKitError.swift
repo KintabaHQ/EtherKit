@@ -13,6 +13,7 @@ public enum EtherKitError: Error {
     case decryptionFailed
     case keyNotFound
     case signatureFailed
+    case keyDerivationFailed
   }
 
   public enum JSONRPCFailureReason {

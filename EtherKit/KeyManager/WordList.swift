@@ -11,7 +11,7 @@ public struct WordList {
       case traditional
       case simplified
     }
-    
+
     case chinese(ChineseCharacterSet)
     case english
     case french
@@ -19,7 +19,7 @@ public struct WordList {
     case japanese
     case korean
     case spanish
-    
+
     var fileName: String {
       switch self {
       case let .chinese(characterSet):
@@ -39,11 +39,11 @@ public struct WordList {
       }
     }
   }
-  
+
   public let language: Language
-  
+
   public lazy var wordList: [String] = {
-    let frameworkBundle = Bundle(for: EtherKeyManager.self)
+    let frameworkBundle = Bundle(for: EtherQuery.self)
     guard let frameworkBundleURL = frameworkBundle.resourceURL?.appendingPathComponent("WordLists.bundle"),
       let wordListPath = Bundle(url: frameworkBundleURL)?.path(forResource: language.fileName, ofType: "txt") else {
       fatalError("Issue locating BIP39 Word List Bundle.  This probably means there's some config issue with your app.")
@@ -53,9 +53,8 @@ public struct WordList {
     return try! String(contentsOfFile: wordListPath, encoding: .utf8)
       .components(separatedBy: "\n")
   }()
-  
+
   public init(language: Language) {
     self.language = language
   }
 }
-

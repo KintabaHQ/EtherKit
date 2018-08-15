@@ -38,8 +38,4 @@ public struct Address: UnformattedDataType {
   public init(data: Data) {
     self.data = data
   }
-
-  public init(from publicKey: Data) {
-    self.init(data: publicKey.sha3(.keccak256)[12 ..< 32])
-  }
 }

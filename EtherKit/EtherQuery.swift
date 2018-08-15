@@ -204,57 +204,63 @@ public final class EtherQuery {
 
   // MARK: Mutative Requests
 
-  public func send(
-    using manager: EtherKeyManager,
-    from: Address,
+  public func send<T: PrivateKeyType>(
+    using key: T,
     to: Address,
     value: UInt256,
     data: GeneralData? = nil,
+    queue: DispatchQueue = DispatchQueue.global(qos: .default),
     completion: @escaping (Result<Hash, EtherKitError>) -> Void
   ) {
-    request(
-      networkVersion(),
-      transactionCount(from, blockNumber: .pending),
-      gasPrice()
-    ) {
+    key.unlocked(queue: queue) {
       switch $0 {
-      case let .failure(error):
-        completion(.failure(error))
-      case let .success(items):
-        let (network, nonce, networkGasPrice) = items
-        let rawTransaction = SendTransaction(
-          to: to,
-          value: value,
-          gasLimit: EtherQuery.DefaultGasLimit,
-          gasPrice: networkGasPrice,
-          nonce: nonce,
-          data: data ?? GeneralData(data: Data())
-        )
-
-        self.requestGasEstimate(for: rawTransaction, from: from) {
+      case .failure:
+        completion(.failure(EtherKitError.keyManagerFailed(reason: .keyNotFound)))
+        return
+      case let .success(unlockedKey):
+        self.request(
+          self.networkVersion(),
+          self.transactionCount(unlockedKey.publicKey.address, blockNumber: .pending),
+          self.gasPrice()
+        ) {
           switch $0 {
           case let .failure(error):
             completion(.failure(error))
-          case let .success(gasLimit):
-
-            let finalTransaction = SendTransaction(
-              to: rawTransaction.to,
-              value: rawTransaction.value,
-              gasLimit: gasLimit,
-              gasPrice: rawTransaction.gasPrice,
-              nonce: rawTransaction.nonce,
-              data: rawTransaction.data
+          case let .success(items):
+            let (network, nonce, networkGasPrice) = items
+            let rawTransaction = SendTransaction(
+              to: to,
+              value: value,
+              gasLimit: EtherQuery.DefaultGasLimit,
+              gasPrice: networkGasPrice,
+              nonce: nonce,
+              data: data ?? GeneralData(data: Data())
             )
 
-            finalTransaction.sign(using: manager, with: from, network: network) {
+            self.requestGasEstimate(for: rawTransaction, from: unlockedKey.publicKey.address) {
               switch $0 {
               case let .failure(error):
                 completion(.failure(error))
-              case let .success(signature):
-                let request = SendRawTransactionRequest(SendRawTransactionRequest.Parameters(
-                  data: RLPData.encode(from: finalTransaction.toRLPValue() + signature.toRLPValue())
-                ))
-                self.request(request) { completion($0) }
+              case let .success(gasLimit):
+
+                let finalTransaction = SendTransaction(
+                  to: rawTransaction.to,
+                  value: rawTransaction.value,
+                  gasLimit: gasLimit,
+                  gasPrice: rawTransaction.gasPrice,
+                  nonce: rawTransaction.nonce,
+                  data: rawTransaction.data
+                )
+
+                finalTransaction.sign(using: unlockedKey, network: network).bimap(
+                  success: { signature in
+                    let request = SendRawTransactionRequest(SendRawTransactionRequest.Parameters(
+                      data: RLPData.encode(from: finalTransaction.toRLPValue() + signature.toRLPValue())
+                    ))
+                    self.request(request) { completion($0) }
+                  },
+                  failure: { $0 }
+                )
               }
             }
           }

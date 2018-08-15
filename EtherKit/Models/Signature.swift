@@ -14,37 +14,40 @@ public protocol Signable {
 
   var usesReplayProtection: Bool { get }
 
-  func sign(
-    using manager: EtherKeyManager,
-    with address: Address,
-    network: Network?,
-    completion: @escaping (Result<Signature, EtherKitError>) -> Void
-  )
+  func sign<T: PrivateKeyImplType>(
+    using impl: T,
+    network: Network?
+  ) -> Result<Signature, EtherKitError>
 }
 
 public extension Signable {
-  public func sign(
-    using manager: EtherKeyManager,
-    with address: Address,
+  public func sign<T: PrivateKeyImplType>(
+    using impl: T,
+    network: Network?
+  ) -> Result<Signature, EtherKitError> {
+    return impl.sign(signatureData(network)).map {
+      let (signature, recoveryID) = $0
+
+      let rValueRaw = BigUInt(signature.subdata(in: signature.startIndex ..< signature.startIndex + 32))
+      let sValueRaw = BigUInt(signature.subdata(in: signature.startIndex + 32 ..< signature.count))
+
+      let networkValue = network?.rawValue ?? 0
+      return Signature(
+        v: UInt(recoveryID) + 27 + ((self.usesReplayProtection && networkValue > 0) ? networkValue * 2 + 8 : 0),
+        r: UInt256(rValueRaw).toPaddedData(),
+        s: UInt256(sValueRaw).toPaddedData()
+      )
+    }
+  }
+
+  public func sign<T: PrivateKeyType>(
+    using key: T,
     network: Network?,
+    queue: DispatchQueue = DispatchQueue.global(qos: .default),
     completion: @escaping (Result<Signature, EtherKitError>) -> Void
   ) {
-    do {
-      try manager.signRaw(signatureData(network), for: address) { rawSignature, recoveryID in
-        let rValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex ..< (rawSignature.startIndex + 32)))
-        let sValueRaw = BigUInt(rawSignature.subdata(in: rawSignature.startIndex + 32 ..< rawSignature.count))
-
-        let networkValue = network?.rawValue ?? 0
-        completion(.success(Signature(
-          v: recoveryID + 27 + ((self.usesReplayProtection && networkValue > 0) ? networkValue * 2 + 8 : 0),
-          r: UInt256(rValueRaw).toPaddedData(),
-          s: UInt256(sValueRaw).toPaddedData()
-        )))
-      }
-    } catch let error as EtherKitError {
-      completion(.failure(error))
-    } catch {
-      completion(.failure(.unknown(error: error)))
+    return key.unlocked(queue: queue) {
+      completion($0.flatMap { impl in self.sign(using: impl, network: network) })
     }
   }
 }

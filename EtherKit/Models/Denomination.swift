@@ -9,13 +9,13 @@ import BigInt
 
 public enum Denomination: BigUInt {
   case wei = 1
-  case kwei = 1_000
+  case kwei = 1000
   case mwei = 1_000_000
   case gwei = 1_000_000_000
   case microether = 1_000_000_000_000
   case milliether = 1_000_000_000_000_000
   case ether = 1_000_000_000_000_000_000
-  
+
   public var abbreviation: String {
     switch self {
     case .wei:
@@ -34,7 +34,7 @@ public enum Denomination: BigUInt {
       return "eth"
     }
   }
-  
+
   public var informalName: String {
     switch self {
     case .wei:
@@ -53,7 +53,7 @@ public enum Denomination: BigUInt {
       return "ether"
     }
   }
-  
+
   public static var defaultNumberFormatter: NumberFormatter {
     let numberFormatter = NumberFormatter()
     numberFormatter.numberStyle = .decimal
@@ -62,7 +62,7 @@ public enum Denomination: BigUInt {
     numberFormatter.locale = Locale.current
     return numberFormatter
   }
-  
+
   public static func formatNumber(
     _ value: UInt256,
     for denomination: Denomination,
@@ -73,7 +73,7 @@ public enum Denomination: BigUInt {
     )
     return "\(formattedNumber) \(denomination.abbreviation)"
   }
-  
+
   public static func convert(
     _ value: UInt256,
     to denomination: Denomination

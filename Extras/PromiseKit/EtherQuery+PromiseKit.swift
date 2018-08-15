@@ -39,15 +39,14 @@ extension EtherQuery {
     }
   }
   
-  public func send(
-    using manager: EtherKeyManager,
-    from: Address,
+  public func send<T: PrivateKeyType>(
+    using key: T,
     to: Address,
     value: UInt256,
     data: GeneralData? = nil
   ) -> Promise<Hash> {
     return Promise { seal in
-      self.send(using: manager, from: from, to: to, value: value, data: data) { seal.resolve($0.value, $0.error) }
+      self.send(using: key, to: to, value: value, data: data) { seal.resolve($0.value, $0.error) }
     }
   }
 }
