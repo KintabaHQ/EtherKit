@@ -153,24 +153,24 @@ final class MnemonicTest: XCTestCase {
       language: .english
     ),
   ]
-  
+
   func testBasicCases() {
     basicTestCases.forEach { item in
-      
+
       let parsedMnemonic = parseMnemonic(for: item.mnemonic)
       let sentence = Mnemonic.create(randomBytes: Data(hex: item.bytesInHex), language: .english)
       let seed = Mnemonic.createSeed(from: sentence, passPhrase: type(of: self).passPhrase)
-      
+
       XCTAssertEqual(parsedMnemonic.mnemonic, sentence.sentence)
       XCTAssertEqual(item.seedInHex, seed.value!.toHexString())
     }
   }
-  
+
   // MARK: Helpers
-  
+
   func parseMnemonic(for sentence: String) -> (mnemonic: [String], length: Mnemonic.SentenceLengthInWords) {
     let mnemonic = Array(sentence.split(separator: " ")).map { String($0) }
-    
+
     let length: Mnemonic.SentenceLengthInWords
     switch mnemonic.count {
     case 12:
@@ -186,7 +186,7 @@ final class MnemonicTest: XCTestCase {
     default:
       fatalError()
     }
-    
+
     return (mnemonic: mnemonic, length: length)
   }
 }

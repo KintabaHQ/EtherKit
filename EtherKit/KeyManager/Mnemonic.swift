@@ -10,12 +10,26 @@ import CryptoSwift
 import Result
 
 public final class Mnemonic {
-  
   public struct MnemonicSentence {
-    public let language: WordList.Language
     public let sentence: [String]
+
+    var data: Data {
+      return Data(bytes: sentence.joined(separator: " ").bytes)
+    }
+
+    public init(_ sentence: [String]) {
+      self.sentence = sentence
+    }
+
+    public init?(from data: Data) {
+      guard let sentence = String(data: data, encoding: .utf8) else {
+        return nil
+      }
+
+      self.sentence = sentence.split(separator: " ").map { String($0) }
+    }
   }
-  
+
   // The longer the sentence, the higher the security.
   public enum SentenceLengthInWords: UInt {
     case twelve = 12
@@ -23,7 +37,7 @@ public final class Mnemonic {
     case eighteen = 18
     case twentyOne = 21
     case twentyFour = 24
-    
+
     var entropyInBits: Int {
       switch self {
       case .twelve:
@@ -39,27 +53,24 @@ public final class Mnemonic {
       }
     }
   }
-  
+
   public static func create(with length: SentenceLengthInWords, language: WordList.Language) -> MnemonicSentence {
     let byteCount = length.entropyInBits / 8
-    var bytes = Data(count: byteCount)
-    _ = bytes.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, byteCount, $0) }
-    
-    return create(randomBytes: bytes, language: language)
+    return create(randomBytes: Data.randomBytes(count: byteCount), language: language)
   }
-  
+
   public static func createSeed(
     from mnemonic: MnemonicSentence,
     passPhrase: String = ""
   ) -> Result<Data, AnyError> {
     do {
       let bytes = try PKCS5.PBKDF2(
-        password: mnemonic.sentence.joined(separator: " ").bytes,
+        password: mnemonic.data.bytes,
         salt: "mnemonic\(passPhrase)".bytes,
         iterations: 2048,
         variant: .sha512
       ).calculate()
-      
+
       return .success(Data(bytes: bytes))
     } catch { error
       // Error here could be: PKCS5.PBKDF2.Error | HMAC.Error, but keeping it general
@@ -67,31 +78,29 @@ public final class Mnemonic {
       return .failure(AnyError(error))
     }
   }
-  
+
   // MARK: Private API
-  
+
   static func create(randomBytes: Data, language: WordList.Language) -> MnemonicSentence {
     let mnemonicSequence: [Bit] = {
       let checksumLength = randomBytes.count / 4
-      let checksum = Array(randomBytes.sha256().bits[0..<checksumLength])
-      
+      let checksum = Array(randomBytes.sha256().bits[0 ..< checksumLength])
+
       var bits = randomBytes.bits
       bits.append(contentsOf: checksum)
       return bits
     }()
-    
+
     let wordList: [String] = {
       var list = WordList(language: language)
       return list.wordList
     }()
-    
+
     return MnemonicSentence(
-      language: language,
-      sentence: mnemonicSequence.chunks(11).map {
+      mnemonicSequence.chunks(11).map {
         let key = Int(bits: $0.reversed())
         return wordList[key]
       }
     )
   }
 }
-

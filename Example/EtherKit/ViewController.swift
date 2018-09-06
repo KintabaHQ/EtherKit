@@ -12,13 +12,11 @@ import PromiseKit
 import UIKit
 
 class ViewController: UIViewController {
-  private lazy var etherKeyManager: EtherKeyManager = {
-    EtherKeyManager(applicationTag: "org.cocoapods.demo.EtherKit-Example")
-  }()
-
-  private var generatedAddress: Address! {
+  private var generatedKey: HDKey.Private! {
     didSet {
-      addressField.text = String(describing: generatedAddress!)
+      generatedKey.unlocked(queue: DispatchQueue.main) {
+        self.addressField.text = $0.value?.publicKey.address.description
+      }
     }
   }
 
@@ -30,11 +28,30 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    _ = firstly {
-      when(fulfilled: etherKeyManager.createKeyPair(.promise), etherKeyManager.createKeyPair(.promise))
-    }.done { address1, address2 in
-      self.generatedAddress = address1
-      self.toAddress = address2
+    let walletStorage = KeychainStorageStrategy(identifier: "etherkit.example")
+    _ = walletStorage.delete()
+    HDKey.Private.create(
+      with: MnemonicStorageStrategy(walletStorage),
+      mnemonic: Mnemonic.create(with: .twelve, language: .english),
+      network: .main,
+      path: [
+        KeyPathNode(at: 44, hardened: true),
+        KeyPathNode(at: 60, hardened: true),
+        KeyPathNode(at: 0, hardened: true),
+        KeyPathNode(at: 0),
+      ]
+    ) {
+      self.generatedKey = $0.value!
+      HDKey.Private(walletStorage, network: .main, path: [
+        KeyPathNode(at: 44, hardened: true),
+        KeyPathNode(at: 60, hardened: true),
+        KeyPathNode(at: 0, hardened: true),
+        KeyPathNode(at: 1),
+      ]).unlocked { value in
+        DispatchQueue.main.async {
+          _ = value.map { key in self.toAddress = key.publicKey.address }
+        }
+      }
     }
   }
 
@@ -44,26 +61,27 @@ class ViewController: UIViewController {
   }
 
   @IBAction func onTap(_: UIButton) {
-    
     let fakeTransaction = SendTransaction(
       to: toAddress,
       value: UInt256(45),
       gasLimit: UInt256(90000),
-      gasPrice: UInt256(400000000000),
+      gasPrice: UInt256(400_000_000_000),
       nonce: UInt256(1),
       data: GeneralData(data: Data())
     )
-    
-    fakeTransaction.sign(using: etherKeyManager, with: generatedAddress, network: .main) { signature in
-      var transactionValues = fakeTransaction.marshaled()
-      transactionValues.merge(signature.value!.marshaled(), uniquingKeysWith: { a, _ in a })
-      self.signedTransactionField.text = String(describing: transactionValues)
+
+    fakeTransaction.sign(using: generatedKey, network: .main) { value in
+      DispatchQueue.main.async {
+        self.signedTransactionField.text = value.value?.description ?? ""
+      }
     }
   }
 
   @IBAction func onPMTap(_: UIButton) {
-    "this is a test message to sign".sign(using: etherKeyManager, with: generatedAddress, network: .main) { signature in
-      self.signedTransactionField.text = String(describing: signature.value!.marshaled())
+    "this is a test message to sign".sign(using: generatedKey, network: .main) { value in
+      DispatchQueue.main.async {
+        self.signedTransactionField.text = value.value?.description ?? ""
+      }
     }
   }
 }

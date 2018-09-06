@@ -8,13 +8,13 @@
 import BigInt
 import Marshal
 
-public struct UInt256: Equatable {  
+public struct UInt256: Equatable {
   public let value: BigUInt
 
   public init(_ value: BigUInt, from denomination: Denomination = .wei) {
     self.value = value * denomination.rawValue
   }
-  
+
   public init(_ value: Double, from denomination: Denomination) {
     self.value = BigUInt(value * Double(denomination.rawValue))
   }
