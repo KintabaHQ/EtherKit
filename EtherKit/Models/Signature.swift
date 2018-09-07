@@ -64,7 +64,13 @@ extension Data: Signable {
 
 extension String: Signable {
   public func signatureData(_: Network?) -> Data {
-    let message = data(using: .utf8)!
+    let message: Data
+    if hasHexPrefix {
+      message = Data(hex: self)
+    } else {
+      message = data(using: .utf8)!
+    }
+
     let prefix = "\u{19}Ethereum Signed Message:\n\(message.count)".data(using: .utf8)!
     return prefix + message
   }
