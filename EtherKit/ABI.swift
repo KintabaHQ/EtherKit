@@ -251,7 +251,7 @@ extension Data: ABIValueType {
   }
 }
 
-extension Array: ABIValueType where Element == ABIValueType {
+extension Array: ABIValueType where Element: ABIValueType {
   public var abiType: ABIType {
     if count == 0 {
       fatalError()
