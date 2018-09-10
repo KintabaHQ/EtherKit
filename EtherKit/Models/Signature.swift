@@ -65,8 +65,8 @@ extension Data: Signable {
 extension String: Signable {
   public func signatureData(_: Network?) -> Data {
     let message: Data
-    if hasHexPrefix {
-      message = Data(hex: self)
+    if hasHexPrefix, let messageData = self.hexToBytes {
+      message = messageData
     } else {
       message = data(using: .utf8)!
     }
