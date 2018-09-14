@@ -203,17 +203,18 @@ public indirect enum ABIType: CustomStringConvertible {
       for tupleElem in value {
         let elemData = tupleElem.encode()
 
-        if tupleElem.isDynamic {
-          // placeholder to be filled in later
-          let placeholder = BigUInt(1).abiType.encode()
-          headDatas.append(placeholder)
-          valueDatas.append(elemData)
-          prefixLength = prefixLength + placeholder.count
-        } else {
+        guard tupleElem.isDynamic else {
           headDatas.append(elemData)
           valueDatas.append(Data())
           prefixLength = prefixLength + elemData.count
+          continue
         }
+
+        // placeholder to be filled in later
+        let placeholder = BigUInt(1).abiType.encode()
+        headDatas.append(placeholder)
+        valueDatas.append(elemData)
+        prefixLength = prefixLength + placeholder.count
       }
 
       for i in 0 ... (value.count - 1) {
