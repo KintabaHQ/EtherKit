@@ -15,7 +15,8 @@ public indirect enum ABIType: CustomStringConvertible {
   case address(value: Address)
   case bytes(count: UnformattedDataMode, value: Data)
   case array(count: UnformattedDataMode, type: ABIType, value: [ABIType])
-  case functionSelector(name: String, parameterTypes: [ABIType], contract: Address?)
+  case tuple(value: [ABIType])
+  case function(name: String, parameters: [ABIType], contract: Address?)
 
   public var description: String {
     switch self {
@@ -43,11 +44,13 @@ public indirect enum ABIType: CustomStringConvertible {
       case let .constrained(count):
         return String(describing: type) + "[\(count)]"
       }
-    case let .functionSelector(name, parameterTypes, _):
-      let parameterString = parameterTypes
+    case let .function(name, parameters, _):
+      let parameterString = parameters
         .compactMap { String(describing: $0) }
         .joined(separator: ",")
       return "\(name)(\(parameterString))"
+    case .tuple:
+      return "tuple[]"
     }
   }
 
@@ -77,7 +80,14 @@ public indirect enum ABIType: CustomStringConvertible {
       case .constrained:
         return type.isDynamic
       }
-    case .functionSelector:
+    case .function:
+      return false
+    case let .tuple(value):
+      for subValue in value {
+        if subValue.isDynamic {
+          return true
+        }
+      }
       return false
     }
   }
@@ -174,7 +184,7 @@ public indirect enum ABIType: CustomStringConvertible {
           data.append(elemData)
         }
       }
-    case let .functionSelector(_, _, contract):
+    case let .function(_, _, contract):
       let funcSig = String(describing: self)
 
       if let contract = contract {
@@ -185,6 +195,42 @@ public indirect enum ABIType: CustomStringConvertible {
       }
       let fullHash = asciiBytes.sha3(.keccak256)
       data.append(fullHash[0 ..< 4])
+    case let .tuple(value):
+      var headDatas: [Data] = []
+      var valueDatas: [Data] = []
+      var prefixLength = 0
+
+      for tupleElem in value {
+        let elemData = tupleElem.encode()
+
+        if tupleElem.isDynamic {
+          // placeholder to be filled in later
+          let placeholder = BigUInt(1).abiType.encode()
+          headDatas.append(placeholder)
+          valueDatas.append(elemData)
+          prefixLength = prefixLength + placeholder.count
+        } else {
+          headDatas.append(elemData)
+          valueDatas.append(Data())
+          prefixLength = prefixLength + elemData.count
+        }
+      }
+
+      for i in 0 ... (value.count - 1) {
+        let tupleElem = value[i]
+
+        if tupleElem.isDynamic {
+          headDatas[i] = BigUInt(prefixLength).abiType.encode()
+          prefixLength = prefixLength + valueDatas[i].count
+        }
+      }
+
+      for headData in headDatas {
+        data.append(headData)
+      }
+      for valueData in valueDatas {
+        data.append(valueData)
+      }
     }
 
     return data
@@ -223,7 +269,55 @@ extension Int: ABIValueType {
   }
 }
 
+extension Int8: ABIValueType {
+  public var abiType: ABIType {
+    return .int(size: 8, value: BigInt(self))
+  }
+}
+
+extension Int16: ABIValueType {
+  public var abiType: ABIType {
+    return .int(size: 16, value: BigInt(self))
+  }
+}
+
+extension Int32: ABIValueType {
+  public var abiType: ABIType {
+    return .int(size: 32, value: BigInt(self))
+  }
+}
+
+extension Int64: ABIValueType {
+  public var abiType: ABIType {
+    return .int(size: 64, value: BigInt(self))
+  }
+}
+
 extension UInt: ABIValueType {
+  public var abiType: ABIType {
+    return .uint(size: 64, value: BigUInt(self))
+  }
+}
+
+extension UInt8: ABIValueType {
+  public var abiType: ABIType {
+    return .uint(size: 8, value: BigUInt(self))
+  }
+}
+
+extension UInt16: ABIValueType {
+  public var abiType: ABIType {
+    return .uint(size: 16, value: BigUInt(self))
+  }
+}
+
+extension UInt32: ABIValueType {
+  public var abiType: ABIType {
+    return .uint(size: 32, value: BigUInt(self))
+  }
+}
+
+extension UInt64: ABIValueType {
   public var abiType: ABIType {
     return .uint(size: 64, value: BigUInt(self))
   }
@@ -264,12 +358,12 @@ extension Array: ABIValueType where Element: ABIValueType {
   }
 }
 
-extension FunctionSelector: ABIValueType {
+extension Function: ABIValueType {
   public var isDynamic: Bool {
     return false
   }
 
   public var abiType: ABIType {
-    return .functionSelector(name: name, parameterTypes: parameterTypes, contract: contract)
+    return .function(name: name, parameters: parameters, contract: contract)
   }
 }
