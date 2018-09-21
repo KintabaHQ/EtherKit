@@ -81,4 +81,11 @@ public enum Denomination: BigUInt {
     let (quotient, remainder) = value.value.quotientAndRemainder(dividingBy: denomination.rawValue)
     return Double(quotient) + Double(remainder) / Double(denomination.rawValue)
   }
+
+  public static func convert(
+    _ value: Double,
+    from denomination: Denomination
+  ) -> UInt256 {
+    return UInt256(BigUInt(value * Double(denomination.rawValue)))
+  }
 }
