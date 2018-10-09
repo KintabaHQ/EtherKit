@@ -217,7 +217,7 @@ public indirect enum ABIType: CustomStringConvertible {
         prefixLength = prefixLength + placeholder.count
       }
 
-      for i in 0 ... (value.count - 1) {
+      for i in 0 ..< value.count {
         let tupleElem = value[i]
 
         if tupleElem.isDynamic {
