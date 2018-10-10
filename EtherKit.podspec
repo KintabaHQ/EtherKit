@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'EtherKit'
-  s.version          = '0.2.0-beta1'
+  s.version          = '0.2.0'
   s.summary          = 'A library for interacting with the Ethereum network.'
 
   s.description      = <<-DESC
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/Vaultio/EtherKit'
   s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
   s.authors          = "Vault, Inc."
-  s.source           = { :git => 'https://github.com/Vaultio/EtherKit.git', :tag => '0.2.0-beta1' }
+  s.source           = { :git => 'https://github.com/Vaultio/EtherKit.git', :tag => '0.2.0' }
 
   s.ios.deployment_target = '10.0'
   s.swift_version = '4.1'
