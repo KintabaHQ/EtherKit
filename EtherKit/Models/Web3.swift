@@ -28,6 +28,8 @@ public struct Web3CommandObject: ValueType {
     var commandObject = Web3CommandObject()
     if let valueString = object as? String {
       commandObject.value = valueString
+    } else if let valueInt = object as? Int {
+      commandObject.value = String(format: "0x%llX", valueInt)
     } else if let typedDataValue = try? TypedData.value(from: object) {
       commandObject.typedData = typedDataValue
     } else {
