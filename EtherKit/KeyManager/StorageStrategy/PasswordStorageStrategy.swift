@@ -14,7 +14,11 @@ public class PasswordStorageStrategy: StorageStrategyType {
   static var salt: [UInt8] {
     return Array("etherkit".utf8)
   }
-  
+
+  static var prefix: Data {
+    return "etherkit".data(using: .utf8)!
+  }
+
   static var semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 
   fileprivate let passwordGetter: PasswordGetter
@@ -53,7 +57,11 @@ public class PasswordStorageStrategy: StorageStrategyType {
       let derivedKey = try getDerivedKey(from: password)
       let aes = try AES(key: derivedKey, blockMode: CTR(iv: iv.bytes))
 
-      keychainStorageStrategy.store(data: Data(bytes: try aes.encrypt(data.bytes)))
+      var prefixedData = Data()
+      prefixedData.append(PasswordStorageStrategy.prefix)
+      prefixedData.append(data)
+
+      keychainStorageStrategy.store(data: Data(bytes: try aes.encrypt(prefixedData.bytes)))
     } catch {
       return .failure(EtherKitError.keyManagerFailed(reason: .encryptionFailed))
     }
@@ -71,7 +79,15 @@ public class PasswordStorageStrategy: StorageStrategyType {
 
     do {
       let aes = try AES(key: getDerivedKey(from: password), blockMode: CTR(iv: iv.bytes))
-      return secureContext(Data(bytes: try aes.decrypt(cipherText.bytes)))
+      let prefixedData = Data(bytes: try aes.decrypt(cipherText.bytes))
+      let prefix = prefixedData.subdata(in: 0 ..< PasswordStorageStrategy.prefix.count)
+      let data = prefixedData.subdata(in: PasswordStorageStrategy.prefix.count ..< prefixedData.count)
+
+      guard prefix == PasswordStorageStrategy.prefix else {
+        return .failure(EtherKitError.keyManagerFailed(reason: .decryptionFailed))
+      }
+
+      return secureContext(data)
     } catch {
       return .failure(EtherKitError.keyManagerFailed(reason: .decryptionFailed))
     }
