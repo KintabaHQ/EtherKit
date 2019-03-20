@@ -9,8 +9,8 @@ import CryptoSwift
 import secp256k1
 
 public struct Address: UnformattedDataType {
-  public static var ZERO: Address{
-    return try! Address(describing: "0x0000000000000000000000000000000000000000")
+  public static var zero: Address {
+    return Address(data: Data(count: 20))
   }
 
   public static var byteCount: UnformattedDataMode {
