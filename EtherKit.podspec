@@ -25,9 +25,9 @@ Pod::Spec.new do |s|
     core.dependency 'BigInt'
     core.dependency 'Starscream'
     core.dependency 'Marshal'
-    core.dependency 'CryptoSwift'
+    core.dependency 'CryptoSwift', "~> 1.0.0"
     core.dependency 'secp256k1.swift'
-    core.dependency 'Result', '~> 4.0.0'
+    core.dependency 'Result'
     core.resource_bundles = {
       'WordLists' => ['Assets/WordLists/*.txt']
     }

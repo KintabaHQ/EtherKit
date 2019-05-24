@@ -1,27 +1,25 @@
 PODS:
-  - BigInt (3.1.0):
-    - SipHash (~> 1.2)
-  - CryptoSwift (0.13.0)
+  - BigInt (4.0.0)
+  - CryptoSwift (1.0.0)
   - EtherKit (0.2.0):
     - EtherKit/Core (= 0.2.0)
     - EtherKit/PromiseKit (= 0.2.0)
   - EtherKit/Core (0.2.0):
     - BigInt
-    - CryptoSwift
+    - CryptoSwift (~> 1.0.0)
     - Marshal
-    - Result (~> 4.0.0)
+    - Result
     - secp256k1.swift
     - Starscream
   - EtherKit/PromiseKit (0.2.0):
     - EtherKit/Core
     - PromiseKit/CorePromise
   - Marshal (1.2.7)
-  - PromiseKit/CorePromise (6.5.3)
-  - Result (4.0.0)
+  - PromiseKit/CorePromise (6.8.4)
+  - Result (4.1.0)
   - secp256k1.swift (0.1.4)
-  - SipHash (1.2.2)
-  - Starscream (3.0.6)
-  - SwiftCheck (0.10.0)
+  - Starscream (3.1.0)
+  - SwiftCheck (0.12.0)
 
 DEPENDENCIES:
   - EtherKit (from `../`)
@@ -35,7 +33,6 @@ SPEC REPOS:
     - PromiseKit
     - Result
     - secp256k1.swift
-    - SipHash
     - Starscream
     - SwiftCheck
 
@@ -44,17 +41,16 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  CryptoSwift: 16e78bebf567bad1c87b2d58f6547f25b74c31aa
-  EtherKit: 5250c0bd414a343e442973fec97d2a8fd8efcdbb
+  BigInt: 2aad1a9942dc932ec8b84290d2c564a3d76f97ab
+  CryptoSwift: d81eeaa59dc5a8d03720fe919a6fd07b51f7439f
+  EtherKit: f595885eb9261f9004b086765fbe563d01ce16f7
   Marshal: ef480864a6af10a63f67be7e55bb5d8fe67a16d9
-  PromiseKit: c609029bdd801f792551a504c695c7d3098b42cd
-  Result: 7645bb3f50c2ce726dd0ff2fa7b6f42bbe6c3713
+  PromiseKit: 51794a832647e7b819336dc2279039ce9f1cc49b
+  Result: bd966fac789cc6c1563440b348ab2598cc24d5c7
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
-  Starscream: ef3ece99d765eeccb67de105bfa143f929026cf5
-  SwiftCheck: 8a3c3638941467bc142d625f374a8409dd262ae8
+  Starscream: 08172b481e145289c4930cb567230fb55897cfa4
+  SwiftCheck: d1dd04d955cc76620b0f84e087536bd059a11c24
 
 PODFILE CHECKSUM: 1b90f733f5b06c3d9e7a7a5dc6b438519fe1ac57
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.7.0
