@@ -1,4 +1,5 @@
 Pod::Spec.new do |s|
+  s.swift_versions   = [5.0]
   s.name             = 'EtherKit'
   s.version          = '0.2.0'
   s.summary          = 'A library for interacting with the Ethereum network.'
@@ -15,17 +16,16 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/Vaultio/EtherKit'
   s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
   s.authors          = "Vault, Inc."
-  s.source           = { :git => 'https://github.com/Vaultio/EtherKit.git', :tag => '0.2.0' }
+  s.source           = { :git => 'https://github.com/Vaultio/EtherKit.git', :branch => 'next' }
 
   s.ios.deployment_target = '10.0'
-  s.swift_version = '4.1'
 
   s.subspec 'Core' do |core|
     core.source_files = 'EtherKit/**/*'
     core.dependency 'BigInt'
     core.dependency 'Starscream'
     core.dependency 'Marshal'
-    core.dependency 'CryptoSwift', "~> 1.0.0"
+    core.dependency 'CryptoSwift', "~> 1.4.1"
     core.dependency 'secp256k1.swift'
     core.dependency 'Result'
     core.resource_bundles = {

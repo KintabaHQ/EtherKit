@@ -1,12 +1,12 @@
 PODS:
-  - BigInt (4.0.0)
-  - CryptoSwift (1.0.0)
+  - BigInt (5.2.0)
+  - CryptoSwift (1.4.1)
   - EtherKit (0.2.0):
     - EtherKit/Core (= 0.2.0)
     - EtherKit/PromiseKit (= 0.2.0)
   - EtherKit/Core (0.2.0):
     - BigInt
-    - CryptoSwift (~> 1.0.0)
+    - CryptoSwift (~> 1.4.1)
     - Marshal
     - Result
     - secp256k1.swift
@@ -15,10 +15,10 @@ PODS:
     - EtherKit/Core
     - PromiseKit/CorePromise
   - Marshal (1.2.7)
-  - PromiseKit/CorePromise (6.8.4)
-  - Result (4.1.0)
+  - PromiseKit/CorePromise (6.15.3)
+  - Result (5.0.0)
   - secp256k1.swift (0.1.4)
-  - Starscream (3.1.0)
+  - Starscream (4.0.4)
   - SwiftCheck (0.12.0)
 
 DEPENDENCIES:
@@ -26,7 +26,7 @@ DEPENDENCIES:
   - SwiftCheck
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - BigInt
     - CryptoSwift
     - Marshal
@@ -41,16 +41,16 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  BigInt: 2aad1a9942dc932ec8b84290d2c564a3d76f97ab
-  CryptoSwift: d81eeaa59dc5a8d03720fe919a6fd07b51f7439f
-  EtherKit: f595885eb9261f9004b086765fbe563d01ce16f7
+  BigInt: f668a80089607f521586bbe29513d708491ef2f7
+  CryptoSwift: 0bc800a7e6a24c4fc9ebeab97d44b0d5f73a78bd
+  EtherKit: 20d941b8011ad5b79d3c030e4a7f31468b678665
   Marshal: ef480864a6af10a63f67be7e55bb5d8fe67a16d9
-  PromiseKit: 51794a832647e7b819336dc2279039ce9f1cc49b
-  Result: bd966fac789cc6c1563440b348ab2598cc24d5c7
+  PromiseKit: 3b2b6995e51a954c46dbc550ce3da44fbfb563c5
+  Result: ed341d2f236af425b803e690e9bd8fd0a0cb7c5a
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  Starscream: 08172b481e145289c4930cb567230fb55897cfa4
+  Starscream: 5178aed56b316f13fa3bc55694e583d35dd414d9
   SwiftCheck: d1dd04d955cc76620b0f84e087536bd059a11c24
 
-PODFILE CHECKSUM: 1b90f733f5b06c3d9e7a7a5dc6b438519fe1ac57
+PODFILE CHECKSUM: 40a3ee730b4d87d8b60511164e7e5f165993a0c5
 
-COCOAPODS: 1.7.0
+COCOAPODS: 1.11.0
